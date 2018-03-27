@@ -31,7 +31,20 @@ export default {
 		}
 	},
 	created: function() {
-		
+    axios
+      .post('/posts', {
+        content: 'Jes paras postaus'
+      })
+      .then((response) => {
+        const data = response.data;
+
+        axios
+          .get('/posts/'+data.post.id)
+          .then((response) => {
+            const data = response.data;
+            console.log(data.post);
+          })
+      })
 	}
 }
 </script>

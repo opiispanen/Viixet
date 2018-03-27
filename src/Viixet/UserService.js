@@ -9,6 +9,13 @@ const storageSpace = 'JerryUser'
 class UserService {
     constructor() {
         this.user = new User()
+        this.callbackState = '/'
+        this.callbacks = []
+    }
+
+    reset() {
+        this.callbackState = '/'
+        this.callbacks = []
     }
 
     setToken(token) {
@@ -16,12 +23,12 @@ class UserService {
     }
     
     authenticate() {
-        return axios.get('/authenticate')
+        return axios.get('authenticate')
     }
 
     login(username, password) {
         return new Promise((resolve, reject) => {
-            axios.post('/login', {
+            axios.post('login', {
                 username,
                 password
             })
@@ -49,8 +56,13 @@ class UserService {
         })
     }
 
+    logout() {
+        return axios.get('logout')
+    }
+
     registration(user) {
-        return axios.post('/registration', user)
+        console.log('user',user);
+        return axios.post('registration', user)
     }
 
     load() {

@@ -3,7 +3,7 @@
 	<div class="row">
 		<div class="col-xs-12 col-md-4 col-md-offset-4">
 			<div class="login-form">
-				<div class="form-item">
+				<div class="form-item" v-if="false">
 					<label>
 						<span class="form-item--label">
 							Email
@@ -28,15 +28,15 @@
 					</label>
 				</div>
 				<div class="form-item">
-					<span class="badge badge-danger" v-if="passwordLegit && passwordRepeat.length">
-						Passwords don't match
-					</span>
 					<label>
 						<span class="form-item--label">
 							Repeat password
 						</span>
 						<input type="password" name="password-repeat" v-model="passwordRepeat">
 					</label>
+					<span class="badge badge-danger" v-if="password.length && passwordRepeat.length && !passwordLegit">
+						Passwords don't match
+					</span>
 				</div>
 				<div class="row">
 					<div class="col-xs-6">
@@ -76,22 +76,49 @@ export default {
         email: ''
 	}),
     computed: {
-        passwordLegit: function() {
-            return this.password !== this.passwordRepeat;
+        passwordLegit() {
+            return this.password === this.passwordRepeat;
         }
     },
 	methods: {
-		registration: function() {
+		registration() {
+			console.log('registration',!this.passwordLegit, this.password, this.passwordRepeat)
             if (!this.passwordLegit)
-                return false;
-
-			this.$userService
+				return false;
+				
+			const reg = this.$userService
 				.registration({
 					username: this.username,
-					password: this.password,
-					email: this.email
-				}).then((response) => {
-					console.log(response);
+					password: this.password
+				})
+			
+			console.log(reg)
+
+			reg
+				.then((response) => {
+					const data = response.data;
+
+					if (data.success) {
+						this.$userService
+							.login(this.username, this.password)
+							.then((response) => {
+								const 
+									callbackState = this.$userService.callbackState,
+									callbacks = this.$userService.callbacks
+
+								callbacks.forEach((callback) => callback())
+
+								this.$router.push(callbackState)
+
+								this.$userService.reset();
+							})
+							.catch((response) => {
+								this.errors.push('Login failed')
+							})
+					}
+				})
+				.catch((response) => {
+					console.log('fail', response)
 				})
 		}
 	}

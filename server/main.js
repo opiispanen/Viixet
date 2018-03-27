@@ -26,6 +26,7 @@ Object
     .keys(routes)
     .forEach((name) => {
         const route = routes[name]
+        const methods = ['get','post','put','delete']
         const register = (method) => {
             if (route.authenticate && route.authenticate[method])
                 app[method](name, (req, res) => {
@@ -44,11 +45,10 @@ Object
                 app[method](name, route[method])
         }
         
-        if (!!route.get)
-            register('get')
-
-        if (!!route.post)
-            register('post')
+        methods.forEach((method) => {
+            if (!!route[method])
+                register(method)
+        })
     })
 
 app.listen(port, () => {

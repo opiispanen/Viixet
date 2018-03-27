@@ -54,7 +54,15 @@ export default {
 			this.$userService
 				.login(this.username, this.password)
 				.then((response) => {
-					this.$router.push('/')
+					const 
+						callbackState = this.$userService.callbackState,
+						callbacks = this.$userService.callbacks
+
+					callbacks.forEach((callback) => callback())
+
+					this.$router.push(callbackState)
+
+					this.$userService.reset();
 				})
 				.catch((response) => {
 					this.errors.push('Login failed')

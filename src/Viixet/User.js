@@ -4,8 +4,6 @@ class User {
         this.username = '';
         this.email = '';
     }
-
-    
 }
 
 export default User

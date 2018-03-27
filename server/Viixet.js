@@ -1,4 +1,4 @@
-const settings = require('./settings.js')
+const settings = require('../../settings.js')
 const DB = require('./DB.js')
 const send = require('./send.js')
 
@@ -68,13 +68,13 @@ class Viixet extends DB {
                                     success: false
                                 })
                             else
-                                this.registration(body.username, body.password, body.email)
+                                this.registration(body.username, body.password)
                                     .then((viixetId) => {
                                         this.getRoutes()['/login'].post(req, res)
                                     })
                                     .catch((data) => send(
                                         res, 
-                                        Object.assign(data, { success: false })
+                                        Object.assign(data, { success: false, method: 'registration' })
                                     ))
                         })
                         .catch((data) => send(
@@ -125,7 +125,7 @@ class Viixet extends DB {
     userAvailable(username) {
         return new Promise((resolve, reject) => {
             this.query(
-                `SELECT viixetId FROM User WHERE username = ?`, 
+                `SELECT viixetId FROM user WHERE username = ?`, 
                 [ username ],
                 (err, rows, fields) => {
                     if (err) reject(err)
@@ -136,7 +136,7 @@ class Viixet extends DB {
         })
     }
 
-    registration(username, password, email) {
+    registration(username, password) {
         return new Promise((resolve, reject) => {
             const validation = this.validate([
                 {
@@ -148,12 +148,12 @@ class Viixet extends DB {
                     name: 'Password',
                     data: password,
                     validate: [{ type: 'min', value: 1 }] 
-                },
-                {
+                }
+                /*,{
                     name: 'Email',
                     data: email,
                     validate: [{ type: 'email' }] 
-                }
+                }*/
             ]).filter(field => field.valid === false)
             
             if (validation.length > 0) {
@@ -167,12 +167,11 @@ class Viixet extends DB {
 
             this.query(
                 `INSERT INTO 
-                    User (username, password, email) 
-                VALUES (?, ?, ?)`, 
+                    user (username, password) 
+                VALUES (?, ?)`, 
                 [ 
                     username, 
-                    this.hash(password), 
-                    email 
+                    this.hash(password)
                 ],
                 (err, result) => {
                     if (err) reject(err)
@@ -196,7 +195,7 @@ class Viixet extends DB {
             this.query(
                 `SELECT 
                     viixetId, username, email 
-                FROM User 
+                FROM user 
                 WHERE username = ? AND password = ?`, 
                 [
                     username, 
@@ -205,13 +204,13 @@ class Viixet extends DB {
                 (err, rows, fields) => {
                     if (err) reject(err)
                     
-                    const row = rows[0]
-
                     if (!rows || !rows.length)
                         reject({
                             error: 'Login failed'
                         })
-                    else
+                    else {
+                        const row = rows[0]
+                        
                         this.clearToken(row['viixetId'])
                             .then(() => {
                                 this.createToken(row['viixetId'])
@@ -224,6 +223,7 @@ class Viixet extends DB {
                                 })
                                 .catch(reject)
                             })
+                    }
                 }
             )
         })
@@ -237,7 +237,7 @@ class Viixet extends DB {
             this.query(
                 `SELECT 
                     token, viixetId, valid 
-                FROM AuthToken 
+                FROM authtoken 
                 WHERE token = ?`, 
                 [ token ],
                 (err, rows, fields) => {
@@ -275,7 +275,7 @@ class Viixet extends DB {
         return new Promise((resolve, reject) => {
             this.query(
                 `INSERT INTO 
-                    AuthToken (token, viixetId) 
+                    authtoken (token, viixetId) 
                 VALUES (?, ?)`, 
                 [ token, viixetId ],
                 (err, rows, fields) => {
@@ -289,7 +289,7 @@ class Viixet extends DB {
 
     updateTokenTime(token, viixetId) {
         this.query(
-            `UPDATE AuthToken
+            `UPDATE authtoken
             SET valid = NOW()
             WHERE token = ? AND viixetId = ?`, 
             [token, viixetId],
@@ -302,7 +302,7 @@ class Viixet extends DB {
     clearToken(viixetId) {
         return new Promise((resolve, reject) => {
             this.query(
-                `DELETE FROM AuthToken
+                `DELETE FROM authtoken
                 WHERE viixetId = ?`, 
                 [ viixetId ],
                 (err, rows, fields) => {
@@ -311,6 +311,40 @@ class Viixet extends DB {
                         resolve()
                 }
             )
+        })
+    }
+
+    getPublicGroups() {
+        return new Promise((resolve, reject) => {
+            this.query(
+                `SELECT * FROM group WHERE type = 2`, 
+                [ user.viixetId ],
+                (err, rows, fields) => {
+                    if (err) reject(err)
+                    else
+                        resolve(!!rows ? rows : [])
+                }
+            )
+        })
+    }
+
+    pushUserGroup(user) {
+
+        return new Promise((resolve, reject) => {
+            this.getPublicGroups()
+                .then((groups) => {
+                    this.query(
+                        `INSERT INTO 
+                            group_user (viixetId, groupId) 
+                        VALUES (?, ?)`, 
+                        [ user.viixetId, groups[0].groupId ],
+                        (err, rows, fields) => {
+                            if (err) reject(err)
+                            else
+                                resolve()
+                        }
+                    )
+                })
         })
     }
 }
