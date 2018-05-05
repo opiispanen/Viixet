@@ -87,3 +87,5 @@ class Posts {
         }
     }
 }
+
+module.exports = new Posts()

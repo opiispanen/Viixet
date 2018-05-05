@@ -1,14 +1,16 @@
 import axios from 'axios'
+import settings from '../settings.js'
 import User from './User.js'
 
-import Login from './Login.vue'
-import Registration from './Registration.vue'
+import Login from './LoginView.vue'
+import Registration from './RegistrationView.vue'
 
-const storageSpace = 'JerryUser'
+const storageSpace = settings.userStorage
 
 class UserService {
     constructor() {
         this.user = new User()
+        this.otherwise = '/signin';
         this.callbackState = '/'
         this.callbacks = []
     }
@@ -114,7 +116,7 @@ class UserService {
 
     behindWall(to, from, next) {
         if (!this.user.token)
-            next('/signin')
+            next(this.otherwise)
         else {
             this.authenticate()
                 .then((response) => {
@@ -123,7 +125,7 @@ class UserService {
                     if (data.success)
                         next()
                     else
-                        next('/signin')
+                        next(this.otherwise)
                 })
         }
     }
