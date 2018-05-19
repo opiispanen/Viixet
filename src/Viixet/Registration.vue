@@ -35,15 +35,22 @@
             Passwords don't match
         </span>
     </div>
+    <div class="form-item">
+        <label>
+            <input type="checkbox" name="consent" v-model="consent">
+            I understand and accept the terms of use (above)
+        </label>
+    </div>
     <div class="row">
-        <div class="col-xs-6">
+        <div class="col-xs-12">
             <button 
                 class="button button-wide button-primary"
+                :disabled="validForm"
                 @click="registration">
-                Save	
+                Create account	
             </button>
         </div>
-        <div class="col-xs-6">
+        <div class="col-xs-6" v-if="false">
             <router-link 
                 class="button button-wide"
                 :to="{ name: 'SignIn' }">
@@ -64,10 +71,12 @@
 export default {
 	name: 'ViixetRegistration',
 	data: () => ({
+        validForm: false,
 		username: '',
 		password: '',
         passwordRepeat: '',
-        email: ''
+        email: '',
+        consent: false
 	}),
     computed: {
         passwordLegit() {
@@ -76,8 +85,8 @@ export default {
     },
 	methods: {
 		registration() {
-			console.log('registration',!this.passwordLegit, this.password, this.passwordRepeat)
-            if (!this.passwordLegit)
+			console.log('consent', this.consent, this.passwordLegit)
+            if (!this.passwordLegit || !this.consent)
 				return false;
 				
 			const reg = this.$userService

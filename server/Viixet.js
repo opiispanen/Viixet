@@ -70,7 +70,21 @@ class Viixet extends DB {
                             else
                                 this.registration(body.username, body.password)
                                     .then((viixetId) => {
-                                        this.getRoutes()['/login'].post(req, res)
+                                        this.getUser(viixetId)
+                                            .then((user) => {
+                                                this.pushUserGroup(user)
+                                                    .then(() => {
+                                                        this.getRoutes()['/login'].post(req, res)
+                                                    })
+                                                    .catch((data) => send(
+                                                        res, 
+                                                        Object.assign(data, { success: false, method: 'registration' })
+                                                    ))
+                                            })
+                                            .catch((data) => send(
+                                                res, 
+                                                Object.assign(data, { success: false, method: 'registration' })
+                                            ))
                                     })
                                     .catch((data) => send(
                                         res, 
@@ -317,8 +331,8 @@ class Viixet extends DB {
     getPublicGroups() {
         return new Promise((resolve, reject) => {
             this.query(
-                `SELECT * FROM group WHERE type = 2`, 
-                [ user.viixetId ],
+                `SELECT * FROM \`group\` WHERE \`type\` = 2`, 
+                [],
                 (err, rows, fields) => {
                     if (err) reject(err)
                     else
@@ -329,21 +343,21 @@ class Viixet extends DB {
     }
 
     pushUserGroup(user) {
-
         return new Promise((resolve, reject) => {
             this.getPublicGroups()
                 .then((groups) => {
-                    this.query(
-                        `INSERT INTO 
-                            group_user (viixetId, groupId) 
-                        VALUES (?, ?)`, 
-                        [ user.viixetId, groups[0].groupId ],
-                        (err, rows, fields) => {
-                            if (err) reject(err)
-                            else
-                                resolve()
-                        }
-                    )
+                    if (!!groups[0])
+                        this.query(
+                            `INSERT INTO 
+                                group_user (viixetId, groupId) 
+                            VALUES (?, ?)`, 
+                            [ user.viixetId, groups[0].groupId ],
+                            (err, rows, fields) => {
+                                if (err) reject(err)
+                                else
+                                    resolve()
+                            }
+                        )
                 })
         })
     }
