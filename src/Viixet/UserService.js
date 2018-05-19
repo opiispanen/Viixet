@@ -23,6 +23,13 @@ class UserService {
     setToken(token) {
         axios.defaults.headers.common['authorization'] = token;
     }
+
+    removeToken() {
+        axios.defaults.headers.common['authorization'] = '';
+        this.user.token = '';
+        
+        this.delete()
+    }
     
     authenticate() {
         return axios.get('authenticate')
@@ -59,11 +66,12 @@ class UserService {
     }
 
     logout() {
+        this.removeToken()
+
         return axios.get('logout')
     }
 
     registration(user) {
-        console.log('user',user);
         return axios.post('registration', user)
     }
 
@@ -89,7 +97,7 @@ class UserService {
 
     delete() {
         const storage = localStorage[storageSpace]
-
+        
         if (!!storage) {
             delete localStorage[storageSpace]
 
@@ -115,17 +123,20 @@ class UserService {
     }
 
     behindWall(to, from, next) {
-        if (!this.user.token)
+        if (!this.user.token) {
+            this.removeToken()
             next(this.otherwise)
-        else {
+        } else {
             this.authenticate()
                 .then((response) => {
                     const data = response.data
     
                     if (data.success)
                         next()
-                    else
+                    else {
+                        this.removeToken()
                         next(this.otherwise)
+                    }
                 })
         }
     }
