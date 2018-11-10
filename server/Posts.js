@@ -1,8 +1,12 @@
+const settings = require('../../settings.js')
+const DB = require('./DB.js')
 const Viixet = require('./Viixet.js')
 const send = require('./send.js')
 
-class Posts {
+class Posts extends DB {
     constructor() {
+        super(settings);
+
         this.posts = []
     }
 
@@ -82,7 +86,7 @@ class Posts {
         return {
             id: Viixet.hash(''+viixetId+i),
             viixetId: viixetId,
-            content: content,
+            content: this.sanitize(content),
             timestamp: Date.now()
         }
     }

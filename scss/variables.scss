@@ -1,0 +1,96 @@
+
+//@import url('https://fonts.googleapis.com/css?family=Roboto');
+$font-family: 'Roboto', sans-serif;
+
+/*
+@import url('https://rsms.me/inter/inter-ui.css');
+$font-family: 'Inter UI', sans-serif;
+*/
+
+//colors
+$primary: #4ECDC4;
+$secondary: #E8C547;
+$terniary: #FF6B6B;
+$black: #292F36;
+$white: #FFFCFF;
+$grey: #CFCFCF;
+
+$success: #2ecc71;
+$warning: #ffb300;
+$danger: #c62828;
+
+$purple: #5662E8;
+$lightpurple: #9B7DB6;
+$lighterpurple: #7D83B6;
+$brown: #9B8276;
+$lightgreen: #80D196;
+
+//dark colors
+$darkprimary: #39968F;
+$darksecondary: #A99034;
+$darkterniary: #E86262;
+$darkgrey: #7F807F;
+
+$darksuccess: #2e7d32;
+$darkwarning: #f57f17;
+$darkdanger: #b71c1c;
+
+$navbarHeight: 3em;
+$navtabHeight: 3em;
+
+$colorNames: primary secondary terniary success warning danger;
+
+$colors: (
+    black: $black,
+    white: $white,
+    grey: $grey,
+    primary: $primary,
+    secondary: $secondary,
+    terniary: $terniary,
+    success: $success,
+    warning: $warning,
+    danger: $danger,
+    darkprimary: $darkprimary,
+    darksecondary: $darksecondary,
+    darkterniary: $darkterniary,
+    darksuccess: $darksuccess,
+    darkwarning: $darkwarning,
+    darkdanger: $darkdanger,
+    darkgrey: $darkgrey
+);
+
+@function color($key){
+    @if map-has-key($colors, $key){
+        @return map-get($colors, $key);
+    }
+}
+
+//common
+$settings: (
+    base_fontSize: 16px,
+    common_borderRadius: 3px,
+    common_bigBorderRadius: 1.35em,
+    common_transitionSpeed: 0.1s,
+
+    input_enableTransitions: 1,
+    input_enableBorders: 1,
+    input_transitionSpeed: 0.1s,
+    input_borderRadius: 4px,
+    input_borderWidth: 1px,
+    input_borderColor: $grey,
+    input_borderStyle: solid,
+
+    button_enableTransitions: 1,
+    button_enableBorders: 0,
+    button_transitionSpeed: 0.1s,
+    button_borderRadius: 2px,
+
+    navbarHeight: 3em,
+    navtabHeight: 3em
+);
+
+@function setting($key){
+    @if map-has-key($settings, $key){
+        @return map-get($settings, $key);
+    }
+}

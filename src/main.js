@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
+import components from './components'
 import UserService from './Viixet/UserService.js'
 
 import App from './App.vue'
@@ -9,7 +11,9 @@ if (UserService.load())
     UserService.setToken(UserService.user.token)
 
 Vue.prototype.$userService = UserService;
+
 Vue.use(VueRouter);
+Vue.use(components);
 
 const behindWall = UserService.behindWall.bind(UserService)
 const routes = [

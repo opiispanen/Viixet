@@ -1,0 +1,75 @@
+.card-base {
+    position: relative;
+    border-radius: setting('common_borderRadius');
+    max-width: 98vw;
+    box-shadow: 0 0.3em 1em 0.2em rgba(51,51,51,.1);
+    margin: 2em 2vw;
+}
+
+.card {
+    padding: 1em 1em;
+    background-size: 178%;
+
+    .card__header {
+        position: relative;
+        margin-bottom: 1.5em;
+    }
+
+    .card__date {
+        font-style: italic;
+        color: #999;
+        opacity: 0.8;
+        font-size: 0.8em;
+    }
+
+    .card__date__topright {
+        position: absolute;
+        top: 2px;
+        right: 6px;
+    }
+
+    .profile {
+        position: relative;
+        height: 42px;
+        padding-left: 42px;
+
+        .avatar {
+            position: absolute;
+            left: 0;
+            border-radius: 50%;
+            padding: 4px 7px;
+
+            .logo {
+                height: 30px;
+                width: 30px;
+                opacity: 0.6;
+            }
+        }
+
+        .username {
+            padding: 5px 0 0 .5em;
+            font-size: 0.8em;
+        }
+    
+        .card__date {
+            padding: 3px 0 0 .5em;
+            font-size: 0.7em;
+        }
+    }
+
+    h1 {
+        font-size: 1.3em;
+    }
+
+    h2 {
+        font-size: 1.15em;
+    }
+
+    h3, h4, p {
+        font-size: 1em;
+    }
+}
+
+@media only screen and (min-width: 48em) {
+    
+}

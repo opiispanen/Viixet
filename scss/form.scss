@@ -1,0 +1,164 @@
+$normalInputs: 'input:not([type="radio"]):not([type="checkbox"])';
+
+input, textarea, button, .button, select {
+    border-radius: setting(input_borderRadius);
+    outline: none;
+    //border-top: 1px solid #d0d0d0 !important;
+}
+
+.form-item {
+    margin: 0.75rem 0;
+
+    label:not(.label-inline) {
+        display: block;
+        position: relative;
+
+        .form-item--label {
+            font-weight: bold;
+            display: block;
+        }
+
+        button, .button {
+            position: absolute;
+            bottom: -0.2em;
+            right: -0.2em;
+            padding: 0.506rem 0.7rem;
+        }
+    }
+
+    label.label-inline {
+        user-select: none;
+    }
+
+    #{$normalInputs},
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.36em 0.5em;
+        font-size: 1.15em;
+
+        @if setting(input_enableBorders) == 1 {
+            border-width: setting(input_borderWidth);
+            border-color: setting(input_borderColor);
+            border-style: setting(input_borderStyle);
+        }
+
+        @if setting(input_enableTransitions) == 1 {
+            transition: setting(input_transitionSpeed) linear;
+        }
+    }
+
+    #{$normalInputs}:focus,
+    select:focus,
+    textarea:focus {
+        box-shadow: 0 2px 12px -4px $primary;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        margin-right: 0.5em;
+        transform: scale(1.25);
+    }
+}
+
+button,
+.button {
+    background: $grey;
+    font-size: 1rem;
+    padding: 0.5rem 0.7rem;
+    box-shadow: 0 3px 10px -4px #333;
+    user-select: none;
+    margin: 0.3em 0.1em;
+    text-align: center;
+
+    @if setting(button_enableBorders) == 1 {
+        border: 1px solid $darkgrey;
+    }
+    @else {
+        border: none;
+    }
+
+    @if setting(button_enableTransitions) == 1 {
+        transition: setting(button_transitionSpeed) linear;
+    }
+}
+
+.button.button-tight {
+    padding: 0.3em 0.6em;
+}
+
+.button.button-thick {
+    padding: 0.9em;
+}
+
+.button.loading:before {
+    font-family: FontAwesome;
+    content: "\f1ce";
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    vertical-align: middle;
+    animation: rotating 2s linear infinite;
+    transform-origin: 50% calc(50% + .5px);
+}
+
+.button.loading {
+
+    * {
+        display: none;
+    }
+}
+
+.button.button-wide {
+    width: 100%;
+    display: inline-block;
+}
+
+.loading-spinner {
+    display: inline-block;
+    text-align: center;
+    opacity: 0.6;
+    margin: 2em;
+}
+
+.loading-spinner:before {
+    font-family: FontAwesome;
+    content: "\f1ce"; // f110 f021 f1ce
+    font-size: 2em;
+    display: inline-block;
+    vertical-align: middle;
+    animation: rotating 2s linear infinite;
+    transform-origin: 50% calc(50% - .5px);
+}
+
+@keyframes rotating {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+}
+
+.button:active {
+    background: $darkgrey;
+    box-shadow: none;
+
+    @if setting(button_enableBorders) == 1 {
+        border: 1px solid $white;
+    }
+}
+
+@each $color in $colorNames {
+    .button.button-#{$color}{
+        color: $white;
+        background: color(#{$color});
+        border-color: color(dark#{$color});
+    }
+
+    .button.button-#{$color}:active {
+        color: $white;
+        background: color(dark#{$color});
+        border-color: color(#{$color});
+    }
+}

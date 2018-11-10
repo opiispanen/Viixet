@@ -1,0 +1,201 @@
+:root {
+    font-size: setting(base_fontSize);
+    color: $black;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: $font-family;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    sub {
+        display: block;
+        font-size: 0.45em;
+        margin: 0.3em 0;
+    }
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin: 0.8rem 0;
+}
+
+h2 {
+    font-size: 1.35rem;
+    margin: 0.7rem 0;
+}
+
+h3 {
+    font-size: 1.25rem;
+    margin: 0.65rem 0;
+}
+
+h4 {
+    font-size: 1.1rem;
+    margin: 0.6rem 0;
+}
+
+h5 {
+    font-size: 1rem;
+    margin: 0.55rem 0;
+}
+
+h6 {
+    font-size: 0.75rem;
+    margin: 0.35rem 0;
+}
+
+p {
+    margin: 0.5rem 0;
+}
+
+hr {
+    margin: 1.5em 0;
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(51, 51, 51, 0.75) 10%, rgba(51, 51, 51, 0.75) 90%, rgba(0, 0, 0, 0) 100%);
+}
+
+.blur {
+    filter: blur(0.25em) grayscale(25%);
+}
+
+.bg-black {
+    background-color: $black;
+    color: $white;
+}
+
+.bg-white {
+    background-color: $white;
+    color: $black;
+}
+
+.bg-grey {
+    background-color: $grey;
+    color: $black;
+}
+
+@each $color in $colorNames {
+    .bg-#{$color} {
+        background-color: color(#{$color});
+        color: $white;
+    }
+
+    .bg-#{$color}-dark {
+        background-color: color(dark#{$color});
+        color: $white;
+    }
+
+    .bg-#{$color}-gradient {
+        background: linear-gradient(to bottom, color(#{$color}), color(dark#{$color}));
+        color: $white;
+    }
+
+    .bg-#{$color}-gradient-horizontal {
+        background: linear-gradient(to right, color(#{$color}), color(dark#{$color}));
+        color: $white;
+    }
+}
+
+.color-black {
+    color: $black;
+}
+
+.color-white {
+    color: $white;
+}
+
+.color-grey {
+    color: $grey;
+}
+
+@each $color in $colorNames {
+    .color-#{$color} {
+        color: color(#{$color});
+    }
+
+    .color-#{$color}-dark {
+        color: color(dark#{$color});
+    }
+}
+
+$alignments: left center right;
+
+@each $a in $alignments {
+    .align-#{$a} {
+        text-align: #{$a};
+    }
+}
+
+.badge {
+    color: $white;
+    background: $darkgrey;
+    padding: 0.25em 0.5em;
+    border-radius: 1em;
+    font-size: 0.8em;
+    box-shadow: 0 3px 10px -4px #333;
+}
+
+.badge.badge-thick {
+    padding: 0.3em 0.6em;
+}
+
+@each $color in $colorNames {
+    .badge-#{$color}{
+        color: $white;
+        background: color(#{$color});
+    }
+
+    .badge-#{$color}-dark {
+        color: $white;
+        background: color(dark#{$color});
+    }
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.hidden-xs {
+    display: none;
+}
+
+@media only screen and (min-width: 48em) {
+    [class*="hidden-"] {
+        display: block;
+    }
+    .hidden-sm {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 64em) {
+    [class*="hidden-"] {
+        display: block;
+    }
+    .hidden-md {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 75em) {
+    [class*="hidden-"] {
+        display: block;
+    }
+    .hidden-lg {
+        display: none;
+    }
+}

@@ -1,23 +1,23 @@
 <template>
-  <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
-	<router-view></router-view>
-  </div>
+<div class="container">
+	<div class="row">
+		<div class="col-xs-8 col-xs-offset-2">
+			<h1>Vue-Express Viixet boilerplate</h1>
+			<p>
+				Okay okay, we're all hungry but we're all gonna get to our hot plates soon enough.
+			</p>
+			<p>
+				What is this? This is a personal project to build a full stack vue-express-nodejs-mysql
+				framework for small project. It's always evolving, maybe not the best idea to pick this 
+				up and use in production.
+			</p>
+			<p>
+				The build size might be pretty big (over 150 kb). Consider using CDN services on vendor code
+				like Vue itself instead of making a vendor bundle with webpack.
+			</p>
+		</div>
+	</div>
+</div>
 </template>
 
 <script>
@@ -25,55 +25,24 @@ import axios from 'axios'
 
 export default {
 	name: 'app',
-	data () {
-		return {
-			msg: 'Welcome to Your Vue-Express-Viixet app'
-		}
-	},
-	created: function() {
-    axios
-      .post('/posts', {
-        content: 'Jes paras postaus'
-      })
-      .then((response) => {
-        const data = response.data;
+	data: () => ({
+		posts: []
+	}),
+	created() {
+		axios
+			.post('/posts', {
+				content: 'Jes paras postaus'
+			})
+			.then((response) => {
+				const data = response.data;
 
-        axios
-          .get('/posts/'+data.post.id)
-          .then((response) => {
-            const data = response.data;
-            console.log(data.post);
-          })
-      })
+				axios
+				.get('/posts/'+data.post.id)
+				.then((response) => {
+					const data = response.data;
+					console.log(data.post);
+				})
+			})
 	}
 }
 </script>
-
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
-</style>

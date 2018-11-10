@@ -4,10 +4,19 @@ const emailValidator = require('email-validator')
 const sanitizeHtml = require('sanitize-html')
 
 class DB {
+
+    /**
+     * 
+     * @param {Object} settings 
+     */
     constructor(settings) {
         this.connection = mysql.createConnection(settings);
     }
 
+    /**
+     * 
+     * @param {String} string 
+     */
     hash(string) {
         return sha256(string)
     }
@@ -18,18 +27,43 @@ class DB {
         //this.connection.end();
     }
 
+    mapDates(obj) {
+        const dateToTimestamp = (date) => (new Date(date)).getTime();
+
+        obj.created = dateToTimestamp(obj.created);
+        obj.modified = dateToTimestamp(obj.modified);
+
+        return obj;
+    }
+
+    /**
+     * 
+     * @param {String} dirty 
+     */
     htmlToText(dirty) {
         return sanitizeHtml(dirty, { allowedTags: [] })
     }
 
+    /**
+     * 
+     * @param {String} dirty 
+     */
     sanitize(dirty) {
         return sanitizeHtml(dirty)
     }
 
+    /**
+     * 
+     * @param {String} email 
+     */
     validateEmail(email) {
         return emailValidator.validate(email);
     }
 
+    /**
+     * 
+     * @param {Array} fields 
+     */
     validate(fields) {
         return fields.map((field) => {
             const errors = [];
@@ -57,6 +91,10 @@ class DB {
                     case 'max':
                         if (!(data.length <= validate.value))
                             errors.push(`${ field.name } too long value`)
+                    break;
+                    case 'enum':
+                        if (validate.value.indexOf(data) < 0)
+                            errors.push(`${ field.name } is not valid value`)
                     break;
                 }
             })

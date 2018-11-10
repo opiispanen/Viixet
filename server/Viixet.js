@@ -70,21 +70,7 @@ class Viixet extends DB {
                             else
                                 this.registration(body.username, body.password)
                                     .then((viixetId) => {
-                                        this.getUser(viixetId)
-                                            .then((user) => {
-                                                this.pushUserGroup(user)
-                                                    .then(() => {
-                                                        this.getRoutes()['/login'].post(req, res)
-                                                    })
-                                                    .catch((data) => send(
-                                                        res, 
-                                                        Object.assign(data, { success: false, method: 'registration' })
-                                                    ))
-                                            })
-                                            .catch((data) => send(
-                                                res, 
-                                                Object.assign(data, { success: false, method: 'registration' })
-                                            ))
+                                        this.getRoutes()['/login'].post(req, res)
                                     })
                                     .catch((data) => send(
                                         res, 
@@ -127,6 +113,7 @@ class Viixet extends DB {
                     
                     if (!rows || !rows.length)
                         reject({
+                            success: false,
                             error: 'User not found'
                         })
                     else
@@ -192,6 +179,7 @@ class Viixet extends DB {
                     else {
                         if (!result || !result.insertId)
                             reject({
+                                success: false,
                                 error: 'Registration failed'
                             })
                         else
@@ -220,6 +208,7 @@ class Viixet extends DB {
                     
                     if (!rows || !rows.length)
                         reject({
+                            success: false,
                             error: 'Login failed'
                         })
                     else {
@@ -259,6 +248,7 @@ class Viixet extends DB {
                     
                     if (!rows || !rows[0])
                         reject({
+                            success: false,
                             error: 'Token not valid'
                         })
                     else {
@@ -273,6 +263,7 @@ class Viixet extends DB {
                                 .catch((err) => reject(err))
                         } else {
                             reject({
+                                success: false,
                                 error: 'Token expired'
                             })
                         }
@@ -331,8 +322,8 @@ class Viixet extends DB {
     getPublicGroups() {
         return new Promise((resolve, reject) => {
             this.query(
-                `SELECT * FROM \`group\` WHERE \`type\` = 2`, 
-                [],
+                `SELECT * FROM group WHERE type = 2`, 
+                [ user.viixetId ],
                 (err, rows, fields) => {
                     if (err) reject(err)
                     else
@@ -343,21 +334,21 @@ class Viixet extends DB {
     }
 
     pushUserGroup(user) {
+
         return new Promise((resolve, reject) => {
             this.getPublicGroups()
                 .then((groups) => {
-                    if (!!groups[0])
-                        this.query(
-                            `INSERT INTO 
-                                group_user (viixetId, groupId) 
-                            VALUES (?, ?)`, 
-                            [ user.viixetId, groups[0].groupId ],
-                            (err, rows, fields) => {
-                                if (err) reject(err)
-                                else
-                                    resolve()
-                            }
-                        )
+                    this.query(
+                        `INSERT INTO 
+                            group_user (viixetId, groupId) 
+                        VALUES (?, ?)`, 
+                        [ user.viixetId, groups[0].groupId ],
+                        (err, rows, fields) => {
+                            if (err) reject(err)
+                            else
+                                resolve()
+                        }
+                    )
                 })
         })
     }

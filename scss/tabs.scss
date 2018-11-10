@@ -1,0 +1,35 @@
+.tabs-master {
+    .tabs {
+        list-style: none;
+        margin: 0.5em 0;
+    
+        .indicator-parent {
+            height: 3px;
+            width: 100%;
+            position: relative;
+        }
+    
+        .indicator {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0px;
+            content: " ";
+            height: 3px;
+            width: 50%;
+            background: #666;
+            transition: 0.3s cubic-bezier(0, 0.43, 0.21, 1.14);
+        }
+    
+        .tab {
+            padding: 0.5em 0em;
+            text-align: center;
+            user-select: none;
+            cursor: pointer;
+        }
+    }
+
+    .content > * {
+        display: none;
+    }
+}

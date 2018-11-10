@@ -1,0 +1,61 @@
+.navbar {
+    height: $navbarHeight;
+    margin: 0;
+    width: 100%;
+
+    .container,
+    .container-fluid {
+        height: 100%;
+    }
+
+    .title {
+        padding: 0.6em 0;
+    }
+
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+        height: 100%;
+    }
+
+    .icon {
+        line-height: 2em;
+        width: 2em;
+        font-size: 1.3em;
+        cursor: pointer;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .form-item {
+        margin: 0.2rem 0;
+    }
+}
+
+body.has-navbar {
+    padding-top: calc(#{$navbarHeight} + 0.75em);
+}
+
+.navbar.navbar-fixed {
+    position: fixed;
+    width: 100%;
+    height: $navbarHeight;
+    top: 0;
+    left: 0;
+    margin: 0;
+    z-index: 2;
+}
+
+@media only screen and (min-width: 48em) {
+    .navbar {
+        .container.rounded {
+            border-bottom-left-radius: setting('common_bigBorderRadius');
+            border-bottom-right-radius: setting('common_bigBorderRadius');
+        }
+
+        .container.chopped {
+            border-bottom-left-radius: setting('common_borderRadius');
+            border-bottom-right-radius: setting('common_borderRadius');
+        }
+    }
+}
