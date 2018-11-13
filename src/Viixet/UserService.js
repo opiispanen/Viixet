@@ -9,10 +9,11 @@ const storageSpace = settings.userStorage
 
 class UserService {
     constructor() {
-        this.user = new User()
+        this.user = new User();
         this.otherwise = '/signin';
-        this.callbackState = '/'
-        this.callbacks = []
+        this.callbackState = '/';
+        this.callbacks = [];
+        this.authenticated = 0;
     }
 
     reset() {
@@ -22,6 +23,7 @@ class UserService {
 
     setToken(token) {
         axios.defaults.headers.common['authorization'] = token;
+        this.authenticated = Date.now();
     }
 
     removeToken() {
@@ -47,7 +49,7 @@ class UserService {
                 if (data.success) {
                     this.user.token = data.user.token;
                     this.user.username = data.user.username;
-                    this.user.email = data.user.email;
+                    this.user.viixetId = data.user.viixetId;
 
                     this.setToken(this.user.token)
                     this.save()
@@ -83,7 +85,7 @@ class UserService {
 
             this.user.token = data.token;
             this.user.username = data.username;
-            this.user.email = data.email;
+            this.user.viixetId = data.viixetId;
 
             return true
         }
@@ -123,21 +125,28 @@ class UserService {
     }
 
     behindWall(to, from, next) {
+        const threshold = (45 * 60 * 1000) / 2;
+
         if (!this.user.token) {
-            this.removeToken()
-            next(this.otherwise)
+            this.removeToken();
+            next(this.otherwise);
         } else {
-            this.authenticate()
-                .then((response) => {
-                    const data = response.data
-    
-                    if (data.success)
-                        next()
-                    else {
-                        this.removeToken()
-                        next(this.otherwise)
-                    }
-                })
+            if (Date.now() - this.authenticated < threshold) {
+                next();
+            } else {
+                this.authenticate()
+                    .then((response) => {
+                        const data = response.data;
+        
+                        if (data.success) {
+                            this.authenticated = Date.now();
+                            next();
+                        } else {
+                            this.removeToken();
+                            next(this.otherwise);
+                        }
+                    })
+            }
         }
     }
 }
