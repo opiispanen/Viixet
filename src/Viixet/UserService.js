@@ -5,7 +5,8 @@ import User from './User.js'
 import Login from './LoginView.vue'
 import Registration from './RegistrationView.vue'
 
-const storageSpace = settings.userStorage
+const storageSpace = settings.userStorage;
+const threshold = (45 * 60 * 1000) / 2;
 
 class UserService {
     constructor() {
@@ -14,6 +15,13 @@ class UserService {
         this.callbackState = '/';
         this.callbacks = [];
         this.authenticated = 0;
+        this.heartbeatId = null;
+
+        // these functions is designed to be overwritten
+        this.hooks = {
+            // do nothing, allow default behaviour
+            authenticationFail: () => true
+        };
     }
 
     reset() {
@@ -23,7 +31,35 @@ class UserService {
 
     setToken(token) {
         axios.defaults.headers.common['authorization'] = token;
+        
         this.authenticated = Date.now();
+
+        this.tokenHeartbeat();
+    }
+
+    tokenHeartbeat(authenticate = false) {
+        if (!!this.heartbeatId) {
+            clearTimeout(this.heartbeatId);
+        }
+
+        if (authenticate) {
+            this.authenticate()
+                .then((response) => {
+                    const data = response.data;
+    
+                    if (data.success) {
+                        this.authenticated = Date.now();
+                    } else {
+                        this.removeToken();
+                    }
+                }).catch(() => {
+                    this.removeToken();
+                })
+        }
+
+        setTimeout(() => {
+            this.heartbeatId = this.tokenHeartbeat(true);
+        }, threshold);
     }
 
     removeToken() {
@@ -51,8 +87,8 @@ class UserService {
                     this.user.username = data.user.username;
                     this.user.viixetId = data.user.viixetId;
 
-                    this.setToken(this.user.token)
-                    this.save()
+                    this.setToken(this.user.token);
+                    this.save();
 
                     resolve({
                         success: true
@@ -68,9 +104,9 @@ class UserService {
     }
 
     logout() {
-        this.removeToken()
-
-        return axios.get('logout')
+        return axios.get('logout').then(() => {
+            this.removeToken()
+        })
     }
 
     registration(user) {
@@ -124,8 +160,13 @@ class UserService {
         ]
     }
 
+    getHook(name) {
+        // play it safe with the hook and allow default behaviour
+        return typeof this.hooks[name] === 'function' ? this.hooks[name] : () => true;
+    }
+
     behindWall(to, from, next) {
-        const threshold = (45 * 60 * 1000) / 2;
+        const authenticationFail = this.getHook('authenticationFail');
 
         if (!this.user.token) {
             this.removeToken();
@@ -142,9 +183,18 @@ class UserService {
                             this.authenticated = Date.now();
                             next();
                         } else {
+                            if (authenticationFail)  {
+                                next(this.otherwise);
+                            }
+
                             this.removeToken();
+                        }
+                    }).catch(() => {
+                        if (authenticationFail)  {
                             next(this.otherwise);
                         }
+
+                        this.removeToken();
                     })
             }
         }

@@ -4,13 +4,13 @@ const emailValidator = require('email-validator')
 const sanitizeHtml = require('sanitize-html')
 
 class DB {
-
     /**
      * 
      * @param {Object} settings 
      */
     constructor(settings) {
-        this.connection = mysql.createConnection(settings);
+        //this.connection = mysql.createConnection(settings);
+        this.pool = mysql.createPool(settings);
     }
 
     /**
@@ -22,9 +22,20 @@ class DB {
     }
 
     query() {
-        //this.connection.connect();
-        this.connection.query.apply(this.connection, arguments)
-        //this.connection.end();
+        //this.connection.query.apply(this.connection, arguments)
+        this.pool.getConnection((err, conn) => {
+            if (!!err && !!err.code) {
+                if (typeof arguments[2] === 'function') {
+                    arguments[2](err, [], {});
+                }
+            } else {
+                const q = conn.query.apply(conn, arguments);
+
+                q.on('end', () => {
+                    conn.release();
+                });
+            }
+        })
     }
 
     mapDates(obj) {
