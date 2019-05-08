@@ -1,34 +1,9 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-
-import components from './components'
-import UserService from './Viixet/UserService.js'
-
+import router from './router.js'
 import App from './App.vue'
-import Viixet from './Viixet.vue'
-
-if (UserService.load())
-    UserService.setToken(UserService.user.token)
-
-Vue.prototype.$userService = UserService;
-
-Vue.use(VueRouter);
-Vue.use(components);
-
-const behindWall = UserService.behindWall.bind(UserService)
-const routes = [
-	{ 
-        path: '/', 
-        name:'Viixet', 
-        component: Viixet,
-        beforeEnter: behindWall
-    }
-]
 
 new Vue({
 	el: '#app',
 	render: h => h(App),
-	router: new VueRouter({
-		routes: routes.concat(UserService.getRoutes())
-	})
+	router
 })

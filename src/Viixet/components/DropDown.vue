@@ -26,7 +26,7 @@ export default {
     name: 'drop-down',
     props: {
         show: {
-            type: 'boolean',
+            type: Boolean,
             required: true
         }
     },

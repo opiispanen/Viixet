@@ -249,7 +249,8 @@ class Viixet extends DB {
                     if (!rows || !rows[0])
                         reject({
                             success: false,
-                            error: 'Token not valid'
+                            error: 'Token not valid',
+                            loginRequired: true
                         })
                     else {
                         const row = rows[0]
@@ -264,7 +265,8 @@ class Viixet extends DB {
                         } else {
                             reject({
                                 success: false,
-                                error: 'Token expired'
+                                error: 'Token expired',
+                                loginRequired: true
                             })
                         }
                     }

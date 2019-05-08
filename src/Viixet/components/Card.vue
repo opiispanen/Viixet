@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import bg from '../assets/logo-light.svg';
+//import bg from '../../assets/logo-light.svg';
 
 export default {
     name:'card',
@@ -24,7 +24,7 @@ export default {
 
     },
     mounted() {
-        this.$refs.card.style.backgroundImage = `url(${ bg })`;
+        // this.$refs.card.style.backgroundImage = `url(${ bg })`;
     }
 }
 </script>

@@ -1,7 +1,6 @@
 <template>
 <div>
-	<nav-bar
-		:black="true"
+	<nav-bar class="bg-black"
         :fixed="true" 
         :rounded="true">
 		<div class="col-xs"></div>
@@ -22,8 +21,13 @@
 </template>
 
 <script>
+import NavBar from './Viixet/components/NavBar.vue'
+
 export default {
 	name: 'app',
+	components: {
+		NavBar
+	},
 	methods: {
         logout() {
             this.$userService

@@ -24,11 +24,11 @@ export default {
     name: 'basic-modal',
     props: {
         show: {
-            type: 'boolean',
+            type: Boolean,
             required: true
         },
         wide: {
-            type: 'boolean',
+            type: Boolean,
             required: false
         }
     },
@@ -64,7 +64,7 @@ export default {
 
     .modal__base {
         width: 95%;
-        max-height: 95%;
+        max-height: 80vh;
         overflow-y: auto;
         position: fixed;
         top: 2.5%;

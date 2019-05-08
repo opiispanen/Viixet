@@ -1,7 +1,7 @@
 {
   "name": "vue-express",
   "description": "A Vue-Express collab",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Otto Piispanen <otto.piispanen@gmail.com>",
   "license": "MIT",
   "private": true,
@@ -20,7 +20,8 @@
     "sanitize-html": "^1.18.2",
     "sha256": "^0.2.0",
     "vue": "^2.5.16",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "vuex": "^3.0.1"
   },
   "browserslist": [
     "> 1%",
@@ -28,10 +29,10 @@
     "not ie <= 8"
   ],
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.4",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-3": "^6.24.1",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
     "cross-env": "^5.1.5",
     "css-loader": "^0.28.11",
     "file-loader": "^1.1.4",
@@ -41,7 +42,6 @@
     "vue-loader": "^13.0.5",
     "vue-template-compiler": "^2.5.16",
     "webpack": "^3.12.0",
-    "webpack-dev-server": "^2.9.1",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-dev-server": "^2.9.1"
   }
 }

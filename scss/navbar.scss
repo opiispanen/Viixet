@@ -2,6 +2,7 @@
     height: $navbarHeight;
     margin: 0;
     width: 100%;
+    user-select: none;
 
     .container,
     .container-fluid {
@@ -43,7 +44,7 @@ body.has-navbar {
     top: 0;
     left: 0;
     margin: 0;
-    z-index: 2;
+    z-index: zIndex('navbar');
 }
 
 @media only screen and (min-width: 48em) {

@@ -66,7 +66,7 @@ button,
     background: $grey;
     font-size: 1rem;
     padding: 0.5rem 0.7rem;
-    box-shadow: 0 3px 10px -4px #333;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     user-select: none;
     margin: 0.3em 0.1em;
     text-align: center;
@@ -81,6 +81,16 @@ button,
     @if setting(button_enableTransitions) == 1 {
         transition: setting(button_transitionSpeed) linear;
     }
+}
+
+.button-bare {
+    background: none;
+    box-shadow: 0 0 0 0;
+}
+
+button:disabled,
+.button:disabled {
+    filter: opacity(50%);
 }
 
 .button.button-tight {

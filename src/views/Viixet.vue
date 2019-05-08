@@ -29,6 +29,7 @@ export default {
 		posts: []
 	}),
 	created() {
+		// this is basicly a demo that the server works
 		axios
 			.post('/posts', {
 				content: 'Jes paras postaus'

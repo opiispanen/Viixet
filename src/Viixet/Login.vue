@@ -5,7 +5,7 @@
             <span class="form-item--label">
                 Username
             </span>
-            <input type="text" name="username" v-model="username">
+            <input type="text" name="username" @keyup.enter="login" v-model="username">
         </label>
     </div>
     <div class="form-item">
@@ -13,7 +13,7 @@
             <span class="form-item--label">
                 Password
             </span>
-            <input type="password" name="password" v-model="password">
+            <input type="password" name="password" @keyup.enter="login" v-model="password">
         </label>
     </div>
     <button 
@@ -27,14 +27,11 @@
         @click="testConnection">
         Test connection	
     </button>
-    <div>
-        If you don't have Viixet.com account, create it
-        <router-link :to="{ name: 'SignUp' }">here</router-link>
-    </div>
 </div>
 </template>
 
 <script>
+import { EventBus } from './EventBus.js'
 
 export default {
 	name: 'ViixetLogin',
@@ -56,10 +53,14 @@ export default {
 
 					this.$router.push(callbackState)
 
-					this.$userService.reset();
+                    this.$userService.reset();
+                    
+                    EventBus.$emit('Viixet.onLogin', true);
 				})
 				.catch((response) => {
-					this.errors.push('Login failed')
+                    this.errors.push('Login failed');
+
+                    EventBus.$emit('Viixet.onLogin', false);
 				})
 		}
 	}

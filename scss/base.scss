@@ -11,6 +11,10 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+html, body {
+    min-height: 100%;
+}
+
 body {
     font-family: $font-family;
 }
@@ -66,46 +70,65 @@ hr {
     margin: 1.5em 0;
     border: 0;
     height: 1px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(51, 51, 51, 0.75) 10%, rgba(51, 51, 51, 0.75) 90%, rgba(0, 0, 0, 0) 100%);
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(51, 51, 51, 0.2) 10%, rgba(51, 51, 51, 0.2) 90%, rgba(0, 0, 0, 0) 100%);
 }
 
 .blur {
-    filter: blur(0.25em) grayscale(25%);
+    filter: blur(0.1em) grayscale(25%);
 }
 
-.bg-black {
+.bg-black:not(.navbar),
+.bg-black.navbar > * {
     background-color: $black;
     color: $white;
 }
 
-.bg-white {
+.bg-white:not(.navbar),
+.bg-white.navbar > * {
     background-color: $white;
     color: $black;
 }
 
-.bg-grey {
+.bg-grey:not(.navbar),
+.bg-grey.navbar > * {
     background-color: $grey;
     color: $black;
 }
 
 @each $color in $colorNames {
-    .bg-#{$color} {
+    .bg-#{$color}:not(.navbar),
+    .bg-#{$color}.navbar > * {
         background-color: color(#{$color});
         color: $white;
     }
 
-    .bg-#{$color}-dark {
+    .bg-#{$color}-dark:not(.navbar),
+    .bg-#{$color}-dark.navbar > * {
         background-color: color(dark#{$color});
         color: $white;
     }
 
-    .bg-#{$color}-gradient {
+    .bg-#{$color}-gradient:not(.navbar),
+    .bg-#{$color}-gradient.navbar > * {
         background: linear-gradient(to bottom, color(#{$color}), color(dark#{$color}));
+        background-repeat: no-repeat;
+        background-size: cover;
         color: $white;
     }
 
-    .bg-#{$color}-gradient-horizontal {
-        background: linear-gradient(to right, color(#{$color}), color(dark#{$color}));
+    .bg-#{$color}-gradient-horizontal:not(.navbar),
+    .bg-#{$color}-gradient-horizontal.navbar > * {
+        background: linear-gradient(to right, color(#{$color}), color(med#{$color}));
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: $white;
+    }
+
+    .bg-#{$color}-gradient-horizontal__inverted:not(.navbar),
+    .bg-#{$color}-gradient-horizontal__inverted.navbar > * {
+        background: linear-gradient(to right, color(med#{$color}), color(#{$color}));
+        background-repeat: no-repeat;
+        background-size: cover;
         color: $white;
     }
 }
@@ -173,7 +196,17 @@ $alignments: left center right;
     display: none;
 }
 
+.container {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
 @media only screen and (min-width: 48em) {
+    .container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
     [class*="hidden-"] {
         display: block;
     }

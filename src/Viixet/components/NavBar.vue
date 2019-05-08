@@ -5,25 +5,21 @@
         'blur': blur
         }">
     <div :class="{ 
-            'bg-black': black,
-            'bg-primary': primary && !gradient, 
-            'bg-primary-gradient': primary && gradient,
-            'bg-primary-gradient-horizontal': primary && gradientHorizontal,
-            'bg-secondary': secondary && !gradient, 
-            'bg-secondary-gradient': secondary && gradient,
-            'bg-secondary-gradient-horizontal': secondary && gradientHorizontal,
-            'bg-terniary': terniary && !gradient, 
-            'bg-terniary-gradient': terniary && gradient,
-            'bg-terniary-gradient-horizontal': terniary && gradientHorizontal,
             'container': !fluid,
             'container-fluid': fluid,
+            'no-gutter': noGutter,
             'rounded': rounded,
             'chopped': chopped
         }">
         <transition name="custom-classes-transition"
                     enter-active-class="animated fadeIn"
                     leave-active-class="animated fadeOut">
-            <div class="row middle-xs">
+            <div class="container" v-if="innerContainer">
+                <div class="row middle-xs">
+                    <slot></slot>
+                </div>
+            </div>
+            <div class="row middle-xs" v-if="!innerContainer">
                 <slot></slot>
             </div>
         </transition>
@@ -36,47 +32,31 @@ export default {
     name: 'navbar',
     props: {
         fixed: {
-            type: 'boolean',
-            required: false
-        },
-        primary: {
-            type: 'boolean',
-            required: false
-        },
-        secondary: {
-            type: 'boolean',
-            required: false
-        },
-        terniary: {
-            type: 'boolean',
-            required: false
-        },
-        gradient: {
-            type: 'boolean',
-            required: false
-        },
-        gradientHorizontal: {
-            type: 'boolean',
-            required: false
-        },
-        black: {
-            type: 'boolean',
+            type: Boolean,
             required: false
         },
         fluid: {
-            type: 'boolean',
+            type: Boolean,
+            required: false
+        },
+        noGutter: {
+            type: Boolean,
             required: false
         },
         rounded: {
-            type: 'boolean',
+            type: Boolean,
             required: false
         },
         chopped: {
-            type: 'boolean',
+            type: Boolean,
             required: false
         },
         blur: {
-            type: 'boolean',
+            type: Boolean,
+            required: false
+        },
+        innerContainer: {
+            type: Boolean,
             required: false
         }
     },

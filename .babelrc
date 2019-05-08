@@ -1,6 +1,9 @@
 {
+  "plugins": [
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/transform-arrow-functions"
+  ],
   "presets": [
-    ["env", { "modules": false }],
-    "stage-3"
+    ["@babel/env", { "modules": false }]
   ]
 }

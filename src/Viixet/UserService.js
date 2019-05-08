@@ -11,12 +11,15 @@ const threshold = (45 * 60 * 1000) / 2;
 class UserService {
     constructor() {
         this.user = new User();
+        this.firstLoad = true;
         this.otherwise = '/signin';
         this.callbackState = '/';
         this.callbacks = [];
         this.authenticated = 0;
         this.heartbeatId = null;
 
+        // hooks do their thing and return a boolean value
+        // to determine if the user is to be redirected as is default
         // these functions is designed to be overwritten
         this.hooks = {
             // do nothing, allow default behaviour
@@ -167,14 +170,16 @@ class UserService {
 
     behindWall(to, from, next) {
         const authenticationFail = this.getHook('authenticationFail');
-
+        
         if (!this.user.token) {
             this.removeToken();
             next(this.otherwise);
         } else {
-            if (Date.now() - this.authenticated < threshold) {
+            if (Date.now() - this.authenticated < threshold && !this.firstLoad) {
                 next();
             } else {
+                this.firstLoad = false;
+
                 this.authenticate()
                     .then((response) => {
                         const data = response.data;

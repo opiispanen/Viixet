@@ -13,6 +13,7 @@ $secondary: #E8C547;
 $terniary: #FF6B6B;
 $black: #292F36;
 $white: #FFFCFF;
+$whitetp: rgba(255,252,255,0.87);
 $grey: #CFCFCF;
 
 $success: #2ecc71;
@@ -24,6 +25,16 @@ $lightpurple: #9B7DB6;
 $lighterpurple: #7D83B6;
 $brown: #9B8276;
 $lightgreen: #80D196;
+
+//med colors
+$medprimary: #21afa5;
+$medsecondary: #A99034;
+$medterniary: #E86262;
+$medgrey: #7F807F;
+
+$medsuccess: #2e7d32;
+$medwarning: #f57f17;
+$meddanger: #b71c1c;
 
 //dark colors
 $darkprimary: #39968F;
@@ -43,6 +54,7 @@ $colorNames: primary secondary terniary success warning danger;
 $colors: (
     black: $black,
     white: $white,
+    whitetp: $whitetp,
     grey: $grey,
     primary: $primary,
     secondary: $secondary,
@@ -50,6 +62,13 @@ $colors: (
     success: $success,
     warning: $warning,
     danger: $danger,
+    medprimary: $medprimary,
+    medsecondary: $medsecondary,
+    medterniary: $medterniary,
+    medsuccess: $medsuccess,
+    medwarning: $medwarning,
+    meddanger: $meddanger,
+    medgrey: $medgrey,
     darkprimary: $darkprimary,
     darksecondary: $darksecondary,
     darkterniary: $darkterniary,
@@ -92,5 +111,20 @@ $settings: (
 @function setting($key){
     @if map-has-key($settings, $key){
         @return map-get($settings, $key);
+    }
+}
+
+$zIndexes: (
+    modal: 5,
+    toast: 4,
+    dropdown: 4,
+    navbar: 3,
+    navtabs: 3,
+    sidemenu: 2
+);
+
+@function zIndex($key){
+    @if map-has-key($zIndexes, $key){
+        @return map-get($zIndexes, $key);
     }
 }

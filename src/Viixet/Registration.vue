@@ -97,8 +97,7 @@ export default {
 			
 			console.log(reg)
 
-			reg
-				.then((response) => {
+			reg.then((response) => {
 					const data = response.data;
 
 					if (data.success) {
@@ -113,15 +112,23 @@ export default {
 
 								this.$router.push(callbackState)
 
-								this.$userService.reset();
+                                this.$userService.reset();
+                                
+                                EventBus.$emit('Viixet.onLogin', true);
 							})
 							.catch((response) => {
-								this.errors.push('Login failed')
+                                this.errors.push('Login failed');
+                                
+                                EventBus.$emit('Viixet.onLogin', false);
 							})
-					}
+                    }
+                    
+                    EventBus.$emit('Viixet.onRegistration', data.success);
 				})
 				.catch((response) => {
-					console.log('fail', response)
+                    console.log('fail', response);
+
+                    EventBus.$emit('Viixet.onRegistration', false);
 				})
 		}
 	}
