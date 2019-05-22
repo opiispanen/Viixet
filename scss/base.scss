@@ -77,55 +77,63 @@ hr {
     filter: blur(0.1em) grayscale(25%);
 }
 
-.bg-black:not(.navbar),
-.bg-black.navbar > * {
+.bg-black:not(.nav),
+.bg-black.navbar > *,
+.bg-black.navtabs > .container {
     background-color: $black;
     color: $white;
 }
 
-.bg-white:not(.navbar),
-.bg-white.navbar > * {
+.bg-white:not(.nav),
+.bg-white.navbar > *,
+.bg-white.navtabs > .container {
     background-color: $white;
     color: $black;
 }
 
-.bg-grey:not(.navbar),
-.bg-grey.navbar > * {
+.bg-grey:not(.nav),
+.bg-grey.navbar > *,
+.bg-grey.navtabs > .container  {
     background-color: $grey;
     color: $black;
 }
 
 @each $color in $colorNames {
-    .bg-#{$color}:not(.navbar),
-    .bg-#{$color}.navbar > * {
+    .bg-#{$color}:not(.nav),
+    .bg-#{$color}.navbar > *,
+    .bg-#{$color}.navtabs > .container  {
         background-color: color(#{$color});
         color: $white;
     }
 
-    .bg-#{$color}-dark:not(.navbar),
-    .bg-#{$color}-dark.navbar > * {
+    .bg-#{$color}-dark:not(.nav),
+    .bg-#{$color}-dark.navbar > *,
+    .bg-#{$color}-dark.navtabs > .container  {
         background-color: color(dark#{$color});
         color: $white;
     }
 
-    .bg-#{$color}-gradient:not(.navbar),
-    .bg-#{$color}-gradient.navbar > * {
+    .bg-#{$color}-gradient:not(.nav),
+    .bg-#{$color}-gradient.navbar > *,
+    .bg-#{$color}-gradient.navtabs > .container {
         background: linear-gradient(to bottom, color(#{$color}), color(dark#{$color}));
         background-repeat: no-repeat;
         background-size: cover;
         color: $white;
     }
 
-    .bg-#{$color}-gradient-horizontal:not(.navbar),
-    .bg-#{$color}-gradient-horizontal.navbar > * {
+    .bg-#{$color}-gradient-horizontal:not(.nav),
+    .bg-#{$color}-gradient-horizontal.navbar > *,
+    .bg-#{$color}-gradient-horizontal.navtabs > .container {
         background: linear-gradient(to right, color(#{$color}), color(med#{$color}));
         background-repeat: no-repeat;
         background-size: cover;
         color: $white;
     }
 
-    .bg-#{$color}-gradient-horizontal__inverted:not(.navbar),
-    .bg-#{$color}-gradient-horizontal__inverted.navbar > * {
+    .bg-#{$color}-gradient-horizontal__inverted:not(.nav),
+    .bg-#{$color}-gradient-horizontal__inverted.navbar > *,
+    .bg-#{$color}-gradient-horizontal__inverted.navtabs > .container {
         background: linear-gradient(to right, color(med#{$color}), color(#{$color}));
         background-repeat: no-repeat;
         background-size: cover;
@@ -165,11 +173,16 @@ $alignments: left center right;
 
 .badge {
     color: $white;
-    background: $darkgrey;
-    padding: 0.25em 0.5em;
-    border-radius: 1em;
+    background: $darkgrey;    
+    padding: 0.5em 0.8em;
+    margin-right: 0.4em;
+    margin-bottom: 0.4em;
+    border-radius: setting('badge_borderRadius');
+    display: inline-block;
     font-size: 0.8em;
-    box-shadow: 0 3px 10px -4px #333;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    cursor: default;
+    user-select: none;
 }
 
 .badge.badge-thick {

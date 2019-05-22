@@ -21,7 +21,9 @@
 </template>
 
 <script>
-import axios from 'axios'
+import RestService from '../services/RestService.js'
+
+const Posts = new RestService('posts')
 
 export default {
 	name: 'app',
@@ -30,20 +32,17 @@ export default {
 	}),
 	created() {
 		// this is basicly a demo that the server works
-		axios
-			.post('/posts', {
-				content: 'Jes paras postaus'
-			})
-			.then((response) => {
-				const data = response.data;
+		Posts.post({
+			content: 'Cool Viixet note post'
+		}).then((response) => {
+			const data = response.data;
 
-				axios
-				.get('/posts/'+data.post.id)
+			Posts.get(data.post.id)
 				.then((response) => {
 					const data = response.data;
 					console.log(data.post);
 				})
-			})
+		})
 	}
 }
 </script>
