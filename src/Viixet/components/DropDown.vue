@@ -1,18 +1,20 @@
 <template>
 <div class="dropdown">
-    <div class="dropdown__button">
+    <div class="dropdown__button" @click="toggleShow($event)">
         <slot name="button"></slot>
     </div>
     <transition name="custom-classes-transition"
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut">
-        <div class="dropdown__backdrop" v-if="show" @click="$emit('close')"></div>
+        <div class="dropdown__backdrop" v-if="show" @click="show = false;"></div>
     </transition>
     <transition name="custom-classes-transition"
             enter-active-class="animated zoomIn"
             leave-active-class="animated zoomOut">
         <div class="dropdown__base bg-white align-left" 
-             v-show="show">
+            ref="base"
+            v-show="show"
+            @click="show = false;">
             <slot name="options"></slot>
         </div>
     </transition>
@@ -24,31 +26,48 @@ import dom from './DomService.js';
 
 export default {
     name: 'drop-down',
-    props: {
-        show: {
-            type: Boolean,
-            required: true
-        }
-    },
+    data: () => ({
+        show: false
+    }),
     methods: {
-        checkSlot: function(slotname) {
+        checkSlot(slotname) {
             return !!this.$slots[slotname];
+        },
+        toggleShow(evt) {
+            if (evt.target === this.$slots['button'][0].elm) {
+                this.show = !this.show;
+            }
+
+            if (this.show) {
+                this.adjustBasePosition();
+            }
+        },
+        adjustBasePosition() {
+            const base = this.$refs.base;
+            const bounding = this.$slots['button'][0].elm.getBoundingClientRect();
+            const distances = {
+                toLeft: bounding.x,
+                toRight: window.innerWidth - (bounding.x + bounding.width),
+                toTop: bounding.y,
+                toBottom: window.innerHeight - (bounding.y + bounding.height) 
+            };
+            const gap = 8;
+
+            if (distances.toTop <= distances.toBottom) {
+                base.style.top = `${ bounding.y + bounding.height + gap }px`;
+            } else {
+                base.style.bottom = `${ window.innerHeight - bounding.y + gap }px`;
+            }
+
+            if (distances.toLeft <= distances.toRight) {
+                base.style.left = `${ bounding.x }px`;
+            } else {
+                base.style.right = `${ window.innerWidth - (bounding.x + bounding.width) }px`;
+            }
         }
-    },
-    mounted() {
-        const 
-            button = this.$el.querySelector('.dropdown__button'),
-            base = this.$el.querySelector('.dropdown__base'),
-            options = this.$el.querySelectorAll('li'),
-            buttonBounding = button.getBoundingClientRect();
-            
-        base.style.top = `${ buttonBounding.bottom / 4 }px`;
-        base.style.right = `${ window.innerWidth - buttonBounding.right }px`;
-        
-        options.forEach((o) => o.addEventListener('click', () => this.$emit('close')));
     },
     watch: {
-        show: function(val, oldVal) {
+        show(val, oldVal) {
             if (val)
                 dom.disableScroll();
             else
@@ -105,13 +124,13 @@ export default {
 
         .dropdown__base {
             .fa {
-                font-size: 2em;
-                display: block;
+                font-size: 1.25em;
+                display: inline-block;
+                margin-right: 0.5em;
             }
 
             li {
-                text-align: center;
-                padding: 1.6em .6em;
+                padding: 1.6em 0.25em 1.6em 1.25em;
             }
         }
         

@@ -53,6 +53,12 @@ body.has-navtabs {
     }
 }
 
+.navtabs.navtab__seamless {
+    .container {
+        box-shadow: none;
+    }
+}
+
 .navtabs.tab-count-4 {
     .navtabs__item__label {
         font-size: 0.55em;
