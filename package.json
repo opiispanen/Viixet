@@ -12,7 +12,7 @@
     "sass": "node-sass scss/frame.scss dist/frame.min.css --output-style compressed"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "body-parser": "^1.18.3",
     "email-validator": "^1.2.3",
     "express": "^4.16.3",
