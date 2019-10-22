@@ -27,5 +27,5 @@ initRoutes(app)
 
 // This launches the app itself with the port defined earlier
 app.listen(port, () => {
-    console.log('Server started')
+    console.log('Server started', `http://localhost:${ port }`)
 })
