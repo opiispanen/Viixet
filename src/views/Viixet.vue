@@ -21,28 +21,9 @@
 </template>
 
 <script>
-import RestService from '../services/RestService.js'
-
-const Posts = new RestService('posts')
-
 export default {
 	name: 'app',
 	data: () => ({
-		posts: []
-	}),
-	created() {
-		// this is basicly a demo that the server works
-		Posts.post({
-			content: 'Cool Viixet note post'
-		}).then((response) => {
-			const data = response.data;
-
-			Posts.get(data.post.id)
-				.then((response) => {
-					const data = response.data;
-					console.log(data.post);
-				})
-		})
-	}
+	})
 }
 </script>

@@ -1,12 +1,15 @@
 <template>
 <div class="login-form">
-    <div class="form-item" v-if="false">
+    <div class="form-item">
         <label>
             <span class="form-item--label">
                 Email
             </span>
             <input type="email" name="email" v-model="email">
         </label>
+        <span class="badge badge-danger" v-if="email.length > 3 && !emailLegit">
+            Not a proper email
+        </span>
     </div>
     <div class="form-item">
         <label>
@@ -15,6 +18,9 @@
             </span>
             <input type="text" name="username" v-model="username">
         </label>
+        <span class="badge badge-danger" v-if="username.length > 1 && !usernameLegit">
+            Username must be longer than 3 characters
+        </span>
     </div>
     <div class="form-item">
         <label>
@@ -45,7 +51,7 @@
         <div class="col-xs-12">
             <button 
                 class="button button-wide button-primary"
-                :disabled="validForm"
+                :disabled="!allLegit"
                 @click="registration">
                 Create account	
             </button>
@@ -79,18 +85,34 @@ export default {
         consent: false
 	}),
     computed: {
+        emailLegit() {
+            const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
+
+            return regex.test(this.email) 
+        },
+        usernameLegit() {
+            return this.username.length > 3
+        },
         passwordLegit() {
             return this.password === this.passwordRepeat;
+        },
+        allLegit() {
+            return this.passwordLegit 
+                && this.usernameLegit
+                && this.emailLegit
+                && this.consent;
         }
     },
 	methods: {
 		registration() {
 			console.log('consent', this.consent, this.passwordLegit)
-            if (!this.passwordLegit || !this.consent)
-				return false;
+            if (!this.allLegit) {
+                return false;
+            }
 				
 			const reg = this.$userService
 				.registration({
+                    email: this.email,
 					username: this.username,
 					password: this.password
 				})

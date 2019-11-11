@@ -1,6 +1,5 @@
 const mysql = require('mysql')
 const sha256 = require('sha256')
-const emailValidator = require('email-validator')
 const sanitizeHtml = require('sanitize-html')
 
 class DB {
@@ -38,6 +37,22 @@ class DB {
         })
     }
 
+    q(query, link = []) {
+        return new Promise((resolve, reject) => {
+            this.query.call(
+                this, 
+                query, 
+                link,
+                (err, result, fields) => {
+                    if (err) reject(err, fields)
+                    else {
+                        resolve(result, fields);
+                    }
+                }
+            )
+        })
+    }
+
     mapDates(obj) {
         const dateToTimestamp = (date) => (new Date(date)).getTime();
 
@@ -68,7 +83,9 @@ class DB {
      * @param {String} email 
      */
     validateEmail(email) {
-        return emailValidator.validate(email);
+        const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
+
+        return regex.test(email) 
     }
 
     /**

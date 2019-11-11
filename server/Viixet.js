@@ -2,316 +2,296 @@ const settings = require('../../settings.js')
 const DB = require('./DB.js')
 const send = require('./send.js')
 
-class Viixet extends DB {
-    constructor() {
-        super(settings.viixet);
-    }
+const db = new DB(settings.viixet);
+const routes = {
+    '/login': {
+        post: (req, res) => {
+            const 
+                body = req.body,
+                data = {
+                    success: false
+                }
+                
+            login(body.username, body.password)
+                .then((user) => {
+                    data.user = user;
+                    data.success = true;
+                    send(res, data)
+                })
+                .catch((data) => send(
+                    res, 
+                    Object.assign(data, { success: false })
+                ))
+        }
+    },
+    '/logout': {
+        get: (req, res) => {
+            const
+                token = req.header('authorization'),
+                data = {
+                    success: false
+                }
 
-    getRoutes() {
-
-        return {
-            '/login': {
-                post: (req, res) => {
-                    const 
-                        body = req.body,
-                        data = {
-                            success: false
-                        }
-                        
-                    this.login(body.username, body.password)
-                        .then((user) => {
-                            data.user = user;
+            authenticate(token)
+                .then((user) => {
+                    clearToken(user.viixetId)
+                        .then(() => {
                             data.success = true;
                             send(res, data)
                         })
-                        .catch((data) => send(
-                            res, 
-                            Object.assign(data, { success: false })
-                        ))
+                })
+                .catch((err) => {
+                    data.error = err;
+                    send(res, data)
+                })
+        }
+    },
+    '/registration': {
+        post: (req, res) => {
+            const 
+                body = req.body,
+                data = {
+                    success: false
                 }
-            },
-            '/logout': {
-                get: (req, res) => {
-                    const
-                        token = req.header('authorization'),
-                        data = {
+            
+            userAvailable(body.username, body.email)
+                .then((result) => {
+                    if (!result)
+                        send(res, {
+                            error: 'User already exists',
                             success: false
-                        }
-
-                    this.authenticate(token)
-                        .then((user) => {
-                            this.clearToken(user.viixetId)
-                                .then(() => {
-                                    data.success = true;
-                                    send(res, data)
-                                })
                         })
-                        .catch((err) => {
-                            data.error = err;
-                            send(res, data)
-                        })
-                }
-            },
-            '/registration': {
-                post: (req, res) => {
-                    const 
-                        body = req.body,
-                        data = {
-                            success: false
-                        }
-                    
-                    this.userAvailable(body.username)
-                        .then((result) => {
-                            if (!result)
-                                send(res, {
-                                    error: 'Username exists',
-                                    success: false
-                                })
-                            else
-                                this.registration(body.username, body.password)
-                                    .then((viixetId) => {
-                                        this.getRoutes()['/login'].post(req, res)
-                                    })
-                                    .catch((data) => send(
-                                        res, 
-                                        Object.assign(data, { success: false, method: 'registration' })
-                                    ))
-                        })
-                        .catch((data) => send(
-                            res, 
-                            Object.assign(data, { error: 'Username taken', success: false })
-                        ))
-                }
-            },
-            '/authenticate': {
-                get: (req, res) => {
-                    const token = req.header('authorization')
-
-                    this.authenticate(token)
-                        .then((user) => {
-                            send(res, {
-                                success: true,
-                                user: user
+                    else
+                        registration(body.username, body.password, body.email)
+                            .then((viixetId) => {
+                                routes['/login'].post(req, res)
                             })
-                        })
-                        .catch((data) => send(
-                            res, 
-                            Object.assign(data, { success: false })
-                        ))
-                }
-            }
+                            .catch((data) => send(
+                                res, 
+                                Object.assign(data, { success: false, method: 'registration' })
+                            ))
+                })
+                .catch((data) => send(
+                    res, 
+                    Object.assign(data, { error: 'Username taken', success: false })
+                ))
+        }
+    },
+    '/authenticate': {
+        get: (req, res) => {
+            const token = req.header('authorization')
+
+            authenticate(token)
+                .then((user) => {
+                    send(res, {
+                        success: true,
+                        user: user
+                    })
+                })
+                .catch((data) => send(
+                    res, 
+                    Object.assign(data, { success: false })
+                ))
         }
     }
+}
 
-    getUser(viixetId) {
-        return new Promise((resolve, reject) => {
-            this.query(
-                `SELECT viixetId, username, email FROM user WHERE viixetId = ?`, 
-                [ viixetId ],
-                (err, rows, fields) => {
-                    if (err) reject(err)
-                    
-                    if (!rows || !rows.length)
-                        reject({
-                            success: false,
-                            error: 'User not found'
-                        })
-                    else
-                        resolve(rows[0])
-                }
-            )
+function getUser(viixetId) {
+    return db.q(
+        `SELECT viixetId, username, email FROM user WHERE viixetId = ?`, 
+        [ viixetId ]
+    ).then((result, fields) => {
+        if (!result || !result.length)
+            return Promise.reject({
+                success: false,
+                error: 'User not found'
+            })
+        else
+            return result[0]
+    })
+}
+
+function userAvailable(username, email) {
+    return db.q(
+        `SELECT viixetId FROM user WHERE username = ? OR email = ?`, 
+        [ username, email ]
+    ).then((result, fields) => {
+        return !result || !result.length
+    })
+}
+
+function registration(username, password, email) {
+    const rejectMessage = {
+        success: false,
+        error: 'Registration failed'
+    }
+    const validation = db.validate([
+        {
+            name: 'User name',
+            data: username,
+            validate: [{ type: 'min', value: 2 }] 
+        },
+        {
+            name: 'Password',
+            data: password,
+            validate: [{ type: 'min', value: 1 }] 
+        }
+        ,{
+            name: 'Email',
+            data: email,
+            validate: [{ type: 'email' }] 
+        }
+    ]).filter(field => field.valid === false)
+    
+    if (validation.length > 0) {
+        return Promise.reject({
+            error: validation
+                    .map((field) => field.errors)
+                    .reduce((errors, error) => errors.concat(error), [])
         })
     }
 
-    userAvailable(username) {
-        return new Promise((resolve, reject) => {
-            this.query(
-                `SELECT viixetId FROM user WHERE username = ?`, 
-                [ username ],
-                (err, rows, fields) => {
-                    if (err) reject(err)
-                    else
-                        resolve(!rows || !rows.length)
-                }
-            )
-        })
+    return db.q(
+        `INSERT INTO 
+            user (username, password, email) 
+        VALUES (?, ?, ?)`, 
+        [ 
+            username, 
+            db.hash(password),
+            email
+        ]
+    ).then((result, fields) => {
+        if (!result || !result.insertId)
+            return Promise.reject(rejectMessage)
+        else
+            return result.insertId
+    }).catch(() => rejectMessage)
+}
+
+function login(username, password) {
+    const rejectMessage = {
+        success: false,
+        error: 'Login failed'
+    }
+    let user = {}
+        
+    return db.q(
+        `SELECT 
+            viixetId, username, email 
+        FROM user 
+        WHERE username = ? AND password = ?`, 
+        [
+            username, 
+            db.hash(password)
+        ]
+    ).then((result, fields) => {
+        if (!result || !result.length) {
+            return Promise.reject(rejectMessage)
+        }
+        
+        const row = result[0]
+        
+        return createToken(row['viixetId'])
+            .then((token) => {
+                user.username = row['username'];
+                user.email = row['email'];
+                user.token = token;
+
+                return user
+            })
+    }).catch(() => {
+        return rejectMessage
+    })
+}
+
+function authenticate(token) {
+    const now = Date.now();
+    const threshold = 45 * 60 * 1000;
+    const rejectMessage = {
+        success: false,
+        error: 'Token expired',
+        loginRequired: true
     }
 
-    registration(username, password) {
-        return new Promise((resolve, reject) => {
-            const validation = this.validate([
-                {
-                    name: 'User name',
-                    data: username,
-                    validate: [{ type: 'min', value: 2 }] 
-                },
-                {
-                    name: 'Password',
-                    data: password,
-                    validate: [{ type: 'min', value: 1 }] 
-                }
-                /*,{
-                    name: 'Email',
-                    data: email,
-                    validate: [{ type: 'email' }] 
-                }*/
-            ]).filter(field => field.valid === false)
-            
-            if (validation.length > 0) {
-                reject({
-                    error: validation
-                            .map((field) => field.errors)
-                            .reduce((errors, error) => errors.concat(error), [])
+    return db.q(
+        `SELECT 
+            token, viixetId, valid 
+        FROM authtoken 
+        WHERE token = ?`, 
+        [ token ]
+    )
+    .then((result, fields) => {
+        if (!result[0]) {
+            return Promise.reject(rejectMessage)
+        }
+
+        const row = result[0]
+
+        if (now - (new Date(row['valid'])).getTime() < threshold) {
+            return getUser(row['viixetId'])
+                .then((user) => {
+                    updateTokenTime(row['token'], row['viixetId']);
+                    return user;
                 })
-                return false;
-            }
+        } else {
+            return Promise.reject(rejectMessage)
+        }
+    })
+    .catch(() => {
+        rejectMessage.error = 'Token not valid';
 
-            this.query(
+        return rejectMessage;
+    })
+}
+
+function createToken(viixetId) {
+    const now = (new Date).getTime()
+    const token = db.hash(((now / 2) + viixetId + now).toString())
+
+    return db.q(
+        `INSERT INTO 
+            authtoken (token, viixetId) 
+        VALUES (?, ?)`, 
+        [ token, viixetId ]
+    ).then((result, fields) => {
+        return token;
+    })
+}
+
+function updateTokenTime(token, viixetId) {
+    return db.q(
+        `UPDATE authtoken
+        SET valid = NOW()
+        WHERE token = ? AND viixetId = ?`, 
+        [token, viixetId]
+    )
+}
+
+function clearToken(viixetId) {
+    return db.q(
+        `DELETE FROM authtoken
+        WHERE viixetId = ?`, 
+        [ viixetId ]
+    )
+}
+
+function getPublicGroups() {
+    return db.q(
+        `SELECT * FROM group WHERE type = 2`, 
+        [ user.viixetId ]
+    ).then((result, fields) => {
+        return result && !!result.length ? result : [];
+    })
+}
+
+function pushUserGroup(user) {
+    return getPublicGroups()
+        .then((groups) => {
+            db.query(
                 `INSERT INTO 
-                    user (username, password) 
+                    group_user (viixetId, groupId) 
                 VALUES (?, ?)`, 
-                [ 
-                    username, 
-                    this.hash(password)
-                ],
-                (err, result) => {
-                    if (err) reject(err)
-                    else {
-                        if (!result || !result.insertId)
-                            reject({
-                                success: false,
-                                error: 'Registration failed'
-                            })
-                        else
-                            resolve(result.insertId)
-                    }
-                }
-            )
-        })
-    }
-
-    login(username, password) {
-        return new Promise((resolve, reject) => {
-            let user = {}
-            
-            this.query(
-                `SELECT 
-                    viixetId, username, email 
-                FROM user 
-                WHERE username = ? AND password = ?`, 
-                [
-                    username, 
-                    this.hash(password)
-                ],
-                (err, rows, fields) => {
-                    if (err) reject(err)
-                    
-                    if (!rows || !rows.length)
-                        reject({
-                            success: false,
-                            error: 'Login failed'
-                        })
-                    else {
-                        const row = rows[0]
-                        
-                        this.clearToken(row['viixetId'])
-                            .then(() => {
-                                this.createToken(row['viixetId'])
-                                .then((token) => {
-                                    user.username = row['username'];
-                                    user.email = row['email'];
-                                    user.token = token;
-
-                                    resolve(user)
-                                })
-                                .catch(reject)
-                            })
-                    }
-                }
-            )
-        })
-    }
-
-    authenticate(token) {
-        return new Promise((resolve, reject) => {
-            const now = Date.now();
-            const threshold = 45 * 60 * 1000;
-
-            this.query(
-                `SELECT 
-                    token, viixetId, valid 
-                FROM authtoken 
-                WHERE token = ?`, 
-                [ token ],
-                (err, rows, fields) => {
-                    if (err) reject(err)
-                    
-                    if (!rows || !rows[0])
-                        reject({
-                            success: false,
-                            error: 'Token not valid',
-                            loginRequired: true
-                        })
-                    else {
-                        const row = rows[0]
-
-                        if (now - (new Date(row['valid'])).getTime() < threshold) {
-                            this.getUser(row['viixetId'])
-                                .then((user) => {
-                                    this.updateTokenTime(row['token'], row['viixetId']);
-                                    resolve(user)
-                                })
-                                .catch((err) => reject(err))
-                        } else {
-                            reject({
-                                success: false,
-                                error: 'Token expired',
-                                loginRequired: true
-                            })
-                        }
-                    }
-                }
-            )
-        })
-    }
-
-    createToken(viixetId) {
-        const now = (new Date).getTime()
-        const token = this.hash(((now / 2) + viixetId + now).toString())
-
-        return new Promise((resolve, reject) => {
-            this.query(
-                `INSERT INTO 
-                    authtoken (token, viixetId) 
-                VALUES (?, ?)`, 
-                [ token, viixetId ],
-                (err, rows, fields) => {
-                    if (err) reject(err)
-                    else
-                        resolve(token)
-                }
-            )
-        })
-    }
-
-    updateTokenTime(token, viixetId) {
-        this.query(
-            `UPDATE authtoken
-            SET valid = NOW()
-            WHERE token = ? AND viixetId = ?`, 
-            [token, viixetId],
-            (err, rows, fields) => {
-                if (err) throw err
-            }
-        )
-    }
-
-    clearToken(viixetId) {
-        return new Promise((resolve, reject) => {
-            this.query(
-                `DELETE FROM authtoken
-                WHERE viixetId = ?`, 
-                [ viixetId ],
+                [ user.viixetId, groups[0].groupId ],
                 (err, rows, fields) => {
                     if (err) reject(err)
                     else
@@ -319,41 +299,6 @@ class Viixet extends DB {
                 }
             )
         })
-    }
-
-    getPublicGroups() {
-        return new Promise((resolve, reject) => {
-            this.query(
-                `SELECT * FROM group WHERE type = 2`, 
-                [ user.viixetId ],
-                (err, rows, fields) => {
-                    if (err) reject(err)
-                    else
-                        resolve(!!rows ? rows : [])
-                }
-            )
-        })
-    }
-
-    pushUserGroup(user) {
-
-        return new Promise((resolve, reject) => {
-            this.getPublicGroups()
-                .then((groups) => {
-                    this.query(
-                        `INSERT INTO 
-                            group_user (viixetId, groupId) 
-                        VALUES (?, ?)`, 
-                        [ user.viixetId, groups[0].groupId ],
-                        (err, rows, fields) => {
-                            if (err) reject(err)
-                            else
-                                resolve()
-                        }
-                    )
-                })
-        })
-    }
 }
 
-module.exports = new Viixet()
+module.exports = routes

@@ -105,7 +105,10 @@ $settings: (
     button_borderRadius: 2px,
 
     navbarHeight: 3em,
-    navtabHeight: 3em
+    navtabHeight: 3em,
+    navtabBorderRadius: 4px,
+
+    badge_borderRadius: 4px
 );
 
 @function setting($key){

@@ -12,3 +12,5 @@ yarn-error.log
 *.sln
 
 .vscode
+
+server/Viixet_old.js
