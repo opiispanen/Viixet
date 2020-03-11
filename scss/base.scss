@@ -202,6 +202,10 @@ $alignments: left center right;
     user-select: none;
 }
 
+.badge.badge-big {
+    font-size: 1.4em;
+}
+
 .badge.badge-thick {
     padding: 0.3em 0.6em;
 }
@@ -222,7 +226,7 @@ $alignments: left center right;
     cursor: pointer;
 }
 
-[hidden] {
+[hidden], .hidden {
     display: none;
 }
 

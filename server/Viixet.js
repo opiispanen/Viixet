@@ -1,8 +1,6 @@
-const settings = require('../../settings.js')
-const DB = require('./DB.js')
 const send = require('./send.js')
+const db = require('./dbInstance.js');
 
-const db = new DB(settings.viixet);
 const routes = {
     '/login': {
         post: (req, res) => {
@@ -98,7 +96,7 @@ const routes = {
 
 function getUser(viixetId) {
     return db.q(
-        `SELECT viixetId, username, email FROM user WHERE viixetId = ?`, 
+        `SELECT viixetId, username, email FROM viixet.user WHERE viixetId = ?`, 
         [ viixetId ]
     ).then((result, fields) => {
         if (!result || !result.length)
@@ -113,7 +111,7 @@ function getUser(viixetId) {
 
 function userAvailable(username, email) {
     return db.q(
-        `SELECT viixetId FROM user WHERE username = ? OR email = ?`, 
+        `SELECT viixetId FROM viixet.user WHERE username = ? OR email = ?`, 
         [ username, email ]
     ).then((result, fields) => {
         return !result || !result.length
@@ -153,7 +151,7 @@ function registration(username, password, email) {
 
     return db.q(
         `INSERT INTO 
-            user (username, password, email) 
+            viixet.user (username, password, email) 
         VALUES (?, ?, ?)`, 
         [ 
             username, 
@@ -178,7 +176,7 @@ function login(username, password) {
     return db.q(
         `SELECT 
             viixetId, username, email 
-        FROM user 
+        FROM viixet.user 
         WHERE username = ? AND password = ?`, 
         [
             username, 
@@ -216,7 +214,7 @@ function authenticate(token) {
     return db.q(
         `SELECT 
             token, viixetId, valid 
-        FROM authtoken 
+        FROM viixet.authtoken 
         WHERE token = ?`, 
         [ token ]
     )
@@ -250,7 +248,7 @@ function createToken(viixetId) {
 
     return db.q(
         `INSERT INTO 
-            authtoken (token, viixetId) 
+            viixet.authtoken (token, viixetId) 
         VALUES (?, ?)`, 
         [ token, viixetId ]
     ).then((result, fields) => {
@@ -260,7 +258,7 @@ function createToken(viixetId) {
 
 function updateTokenTime(token, viixetId) {
     return db.q(
-        `UPDATE authtoken
+        `UPDATE viixet.authtoken
         SET valid = NOW()
         WHERE token = ? AND viixetId = ?`, 
         [token, viixetId]
@@ -269,7 +267,7 @@ function updateTokenTime(token, viixetId) {
 
 function clearToken(viixetId) {
     return db.q(
-        `DELETE FROM authtoken
+        `DELETE FROM viixet.authtoken
         WHERE viixetId = ?`, 
         [ viixetId ]
     )
@@ -277,7 +275,7 @@ function clearToken(viixetId) {
 
 function getPublicGroups() {
     return db.q(
-        `SELECT * FROM group WHERE type = 2`, 
+        `SELECT * FROM viixet.group WHERE type = 2`, 
         [ user.viixetId ]
     ).then((result, fields) => {
         return result && !!result.length ? result : [];
@@ -289,7 +287,7 @@ function pushUserGroup(user) {
         .then((groups) => {
             db.query(
                 `INSERT INTO 
-                    group_user (viixetId, groupId) 
+                    viixet.group_user (viixetId, groupId) 
                 VALUES (?, ?)`, 
                 [ user.viixetId, groups[0].groupId ],
                 (err, rows, fields) => {
@@ -301,4 +299,7 @@ function pushUserGroup(user) {
         })
 }
 
-module.exports = routes
+module.exports = {
+    routes,
+    authenticate
+}

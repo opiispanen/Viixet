@@ -16,9 +16,8 @@ The database is also fairly simple to replace to whatever you want if MySQL is n
 ## Installation
 1. Load ZIP or checkout from github
 2. Run the viixet-mysql.sql script to create the database
-    - If you don't use the default mysql port, check out the
-    server/settings.js file for database settings.
-3. In the extracted location, run: `npm install` and `npm run server`
+    - Create an environment file .env and follow the provided .env_sample style for DB settings
+3. In the extracted location, run: `npm install`, `npm run sass`, `npm run build` and `npm run server`
 4. In your browser go to localhost:3000 and the app should be running
 
 ## Tips

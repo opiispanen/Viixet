@@ -1,3 +1,7 @@
+// This loads up envinronmental variables 
+// to process.env object that available everywhere
+// after loading it up
+require('dotenv').config()
 // Load all the npm based depedencies needed here
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -6,7 +10,7 @@ const initRoutes = require('./initRoutes.js')
 
 // Initialize the express app and define a port for it
 const app = express()
-const port = 3000
+const port = process.env.SERVER_PORT
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
