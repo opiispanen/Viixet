@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import UserService from './Viixet/UserService.js'
-import User from './Viixet/User.js'
+import store from './store.js'
 
 // lazy loaded 
 const Viixet = () => import('./views/Viixet.vue')
@@ -9,14 +8,41 @@ const Splash = () => import('./views/Splash.vue')
 
 Vue.use(VueRouter)
 
-UserService.otherwise = '/splash'
+store.dispatch('user/load')
+store.commit('user/setOtherwise', '/splash')
 
-if (UserService.load())
-    UserService.setToken(UserService.user.token)
+const behindWall = (to, from, next) => {
+    const token = store.getters['user/token'];
+    const authenticated = store.getters['user/authenticated'];
+    const otherwise = store.state.user.otherwise;
+    const firstLoad = store.state.user.firstLoad;
+    const initLoginModal = () => {
+        store.commit('user/setCallbackState', to.path)
+        store.commit('user/setCallbacks', [() => store.commit('toggleModal', false)])
+        store.commit('setActivePortal','user-modal')
+        store.commit('toggleModal', true)
+    }
+    
+    if (!token) {
+        store.dispatch('user/removeToken')
+        initLoginModal()
+        next(otherwise)
+        return;
+    }
 
-Vue.prototype.$userService = UserService
+    if (authenticated && !firstLoad) {
+        next();
+        return;
+    }
 
-const behindWall = UserService.behindWall.bind(UserService)
+    store.commit('user/setFirstLoad', false)
+    store.dispatch('user/authenticate')
+        .then(() => next())
+        .catch(() => {
+            initLoginModal()
+            next(otherwise)
+        })
+}
 const routes = [
     { 
         path: '/', 
@@ -28,8 +54,7 @@ const routes = [
         path: '/splash',
         name: 'Splash',
         component: Splash
-    },
-    ...UserService.getRoutes()
+    }
 ]
 
 export default new VueRouter({

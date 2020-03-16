@@ -7,7 +7,7 @@
             </span>
             <input type="email" name="email" v-model="email">
         </label>
-        <span class="badge badge-danger" v-if="email.length > 3 && !emailLegit">
+        <span class="badge badge-danger" v-if="email.length > 3 && emailLegit">
             Not a proper email
         </span>
     </div>
@@ -18,7 +18,7 @@
             </span>
             <input type="text" name="username" v-model="username">
         </label>
-        <span class="badge badge-danger" v-if="username.length > 1 && !usernameLegit">
+        <span class="badge badge-danger" v-if="username.length > 3 && usernameLegit">
             Username must be longer than 3 characters
         </span>
     </div>
@@ -76,6 +76,12 @@
 <script>
 export default {
 	name: 'ViixetRegistration',
+    props: {
+        useCallbacks: {
+            default: true,
+            type: Boolean
+        }
+    },
 	data: () => ({
         validForm: false,
 		username: '',
@@ -88,10 +94,10 @@ export default {
         emailLegit() {
             const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
 
-            return regex.test(this.email) 
+            return regex.test(this.username) 
         },
         usernameLegit() {
-            return this.username.length > 3
+            this.username.length > 3
         },
         passwordLegit() {
             return this.password === this.passwordRepeat;
@@ -104,53 +110,43 @@ export default {
         }
     },
 	methods: {
-		registration() {
-			console.log('consent', this.consent, this.passwordLegit)
+        registration() {
             if (!this.allLegit) {
                 return false;
             }
-				
-			const reg = this.$userService
-				.registration({
-                    email: this.email,
-					username: this.username,
-					password: this.password
-				})
-			
-			console.log(reg)
 
-			reg.then((response) => {
+            this.$store
+                .dispatch('user/registration', {
+                    email: this.email,
+                    username: this.username,
+                    password: this.password
+                })
+			    .then((response) => {
 					const data = response.data;
 
 					if (data.success) {
-						this.$userService
-							.login(this.username, this.password)
-							.then((response) => {
-								const 
-									callbackState = this.$userService.callbackState,
-									callbacks = this.$userService.callbacks
+						this.$store
+                            .dispatch('user/login', {
+                                username: this.username,
+                                password: this.password
+                            })
+                            .then((response) => {
+                                if (this.useCallbacks) {
+                                    const callbackState = this.$store.state.user.callbackState
+                                    const callbacks = this.$store.state.user.callbacks
 
-								callbacks.forEach((callback) => callback())
-
-								this.$router.push(callbackState)
-
-                                this.$userService.reset();
-                                
-                                EventBus.$emit('Viixet.onLogin', true);
-							})
-							.catch((response) => {
+                                    callbacks.forEach((callback) => callback())
+                                    this.$nextTick(() => this.$router.push(callbackState))
+                                }
+                                this.$store.dispatch('user/reset');
+                            })
+                            .catch((response) => {
                                 this.errors.push('Login failed');
-                                
-                                EventBus.$emit('Viixet.onLogin', false);
-							})
+                            })
                     }
-                    
-                    EventBus.$emit('Viixet.onRegistration', data.success);
 				})
 				.catch((response) => {
                     console.log('fail', response);
-
-                    EventBus.$emit('Viixet.onRegistration', false);
 				})
 		}
 	}

@@ -1,5 +1,6 @@
 const send = require('./send.js')
-const db = require('./dbInstance.js');
+const db = require('./dbInstance.js')
+const authScheme = process.env.DB_AUTH_SCHEME
 
 const routes = {
     '/login': {
@@ -96,7 +97,7 @@ const routes = {
 
 function getUser(viixetId) {
     return db.q(
-        `SELECT viixetId, username, email FROM viixet.user WHERE viixetId = ?`, 
+        `SELECT viixetId, username, email FROM ${ authScheme }user WHERE viixetId = ?`, 
         [ viixetId ]
     ).then((result, fields) => {
         if (!result || !result.length)
@@ -111,7 +112,7 @@ function getUser(viixetId) {
 
 function userAvailable(username, email) {
     return db.q(
-        `SELECT viixetId FROM viixet.user WHERE username = ? OR email = ?`, 
+        `SELECT viixetId FROM ${ authScheme }user WHERE username = ? OR email = ?`, 
         [ username, email ]
     ).then((result, fields) => {
         return !result || !result.length
@@ -151,7 +152,7 @@ function registration(username, password, email) {
 
     return db.q(
         `INSERT INTO 
-            viixet.user (username, password, email) 
+            ${ authScheme }user (username, password, email) 
         VALUES (?, ?, ?)`, 
         [ 
             username, 
@@ -163,7 +164,7 @@ function registration(username, password, email) {
             return Promise.reject(rejectMessage)
         else
             return result.insertId
-    }).catch(() => rejectMessage)
+    }).catch(() => Promise.reject(rejectMessage))
 }
 
 function login(username, password) {
@@ -176,7 +177,7 @@ function login(username, password) {
     return db.q(
         `SELECT 
             viixetId, username, email 
-        FROM viixet.user 
+        FROM ${ authScheme }user 
         WHERE username = ? AND password = ?`, 
         [
             username, 
@@ -198,7 +199,7 @@ function login(username, password) {
                 return user
             })
     }).catch(() => {
-        return rejectMessage
+        return Promise.reject(rejectMessage)
     })
 }
 
@@ -214,7 +215,7 @@ function authenticate(token) {
     return db.q(
         `SELECT 
             token, viixetId, valid 
-        FROM viixet.authtoken 
+        FROM ${ authScheme }authtoken 
         WHERE token = ?`, 
         [ token ]
     )
@@ -238,7 +239,7 @@ function authenticate(token) {
     .catch(() => {
         rejectMessage.error = 'Token not valid';
 
-        return rejectMessage;
+        return Promise.reject(rejectMessage);
     })
 }
 
@@ -248,7 +249,7 @@ function createToken(viixetId) {
 
     return db.q(
         `INSERT INTO 
-            viixet.authtoken (token, viixetId) 
+            ${ authScheme }authtoken (token, viixetId) 
         VALUES (?, ?)`, 
         [ token, viixetId ]
     ).then((result, fields) => {
@@ -258,7 +259,7 @@ function createToken(viixetId) {
 
 function updateTokenTime(token, viixetId) {
     return db.q(
-        `UPDATE viixet.authtoken
+        `UPDATE ${ authScheme }authtoken
         SET valid = NOW()
         WHERE token = ? AND viixetId = ?`, 
         [token, viixetId]
@@ -267,7 +268,7 @@ function updateTokenTime(token, viixetId) {
 
 function clearToken(viixetId) {
     return db.q(
-        `DELETE FROM viixet.authtoken
+        `DELETE FROM ${ authScheme }authtoken
         WHERE viixetId = ?`, 
         [ viixetId ]
     )
@@ -275,7 +276,7 @@ function clearToken(viixetId) {
 
 function getPublicGroups() {
     return db.q(
-        `SELECT * FROM viixet.group WHERE type = 2`, 
+        `SELECT * FROM ${ authScheme }group WHERE type = 2`, 
         [ user.viixetId ]
     ).then((result, fields) => {
         return result && !!result.length ? result : [];
@@ -287,7 +288,7 @@ function pushUserGroup(user) {
         .then((groups) => {
             db.query(
                 `INSERT INTO 
-                    viixet.group_user (viixetId, groupId) 
+                    ${ authScheme }group_user (viixetId, groupId) 
                 VALUES (?, ?)`, 
                 [ user.viixetId, groups[0].groupId ],
                 (err, rows, fields) => {

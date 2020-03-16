@@ -10,39 +10,44 @@
 		<div class="col-xs" style="text-align:center;">
 			<span 
 				@click="logout" 
-				v-if="loggedIn"
+				v-if="$store.getters['user/isLoggedIn']"
 				style="cursor:pointer;">
 				logout
 			</span>
 		</div>
 	</nav-bar>
 	<router-view></router-view>
+    <basic-modal
+        :show="$store.state.showModal" 
+        :wide="false"
+        @close="$store.commit('toggleModal', false)">
+        <portal-target :name="$store.state.activePortal"></portal-target>
+    </basic-modal>
+    <user-modal></user-modal>
 </div>
 </template>
 
 <script>
-import { EventBus } from './Viixet/EventBus.js'
 import NavBar from './Viixet/components/NavBar.vue'
+import BasicModal from './Viixet/components/BasicModal.vue'
+import UserModal from './Viixet/components/BasicModal.vue'
 
 export default {
 	name: 'app',
 	components: {
-		NavBar
+		NavBar,
+        BasicModal,
+        UserModal
 	},
 	computed: {
-        loggedIn() {
-            return this.$store.state.loggedIn;
-        }
     },
 	methods: {
         logout() {
-            this.$userService
-                .logout()
+            this.$store.dispatch('user/logout')
                 .then(() => {
-                    this.$router.push({ path: this.$userService.otherwise })
-                    this.$store.commit('logout');
+                    this.$router.push('/splash')
                 })
-		}
+        }
 	},
 	beforeCreate() {
         this.$store.dispatch('windowResize', window.innerWidth);
@@ -50,24 +55,6 @@ export default {
         window.addEventListener('resize', () => {
             this.$store.dispatch('windowResize', window.innerWidth);
         })
-
-        if (!!this.$userService.user.token) {
-            this.$store.commit('login', {
-                loggedIn: true,
-                username: this.$userService.user.username
-            });
-        }
-
-        EventBus.$on('Viixet.loginRequired', () => {
-            this.$router.push({ name:'SignIn' });
-        })
-
-        EventBus.$on('Viixet.onLogin', (val) => {
-            this.$store.commit('login', {
-                loggedIn: val,
-                username: this.$userService.user.username
-            });
-		});
     }
 }
 </script>

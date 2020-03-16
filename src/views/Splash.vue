@@ -23,6 +23,9 @@ export default {
         login,
         registration,
         tabs
+    },
+    mounted() {
+        this.$store.commit('user/setCallbackState', '/')
     }
 }
 </script>

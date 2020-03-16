@@ -31,38 +31,40 @@
 </template>
 
 <script>
-import { EventBus } from './EventBus.js'
-
 export default {
-	name: 'ViixetLogin',
+    name: 'ViixetLogin',
+    props: {
+        useCallbacks: {
+            default: true,
+            type: Boolean
+        }
+    },
 	data: () => ({
 		username: '',
 		password: '',
 		errors: []
 	}),
 	methods: {
-		login: function() {
-			this.$userService
-				.login(this.username, this.password)
-				.then((response) => {
-					const 
-						callbackState = this.$userService.callbackState,
-						callbacks = this.$userService.callbacks
-
-					callbacks.forEach((callback) => callback())
-
-					this.$router.push(callbackState)
-
-                    this.$userService.reset();
-                    
-                    EventBus.$emit('Viixet.onLogin', true);
+        login() {
+            this.$store
+                .dispatch('user/login', {
+                    username: this.username,
+                    password: this.password
+                })
+                .then((response) => {
+                    if (this.useCallbacks) {
+                        const callbackState = this.$store.state.user.callbackState
+                        const callbacks = this.$store.state.user.callbacks
+                        
+                        callbacks.forEach((callback) => callback())
+                        this.$nextTick(() => this.$router.push(callbackState))
+                    }
+                    this.$store.dispatch('user/reset');
 				})
 				.catch((response) => {
                     this.errors.push('Login failed');
-
-                    EventBus.$emit('Viixet.onLogin', false);
 				})
-		}
+        }
 	}
 }
 </script>

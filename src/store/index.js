@@ -1,4 +1,5 @@
 import common from './common.js'
+import user from './user.js'
 
 export default {
     state: {
@@ -14,6 +15,6 @@ export default {
         ...common.actions
     },
     modules: {
-        
+        user
     }
 }

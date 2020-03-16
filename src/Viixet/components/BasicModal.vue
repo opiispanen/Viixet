@@ -90,6 +90,12 @@ $gutter: 0.6em;
         padding-top: $gutter;
     }
 
+    .modal__footer {
+        margin: $gutter -1em -1em -1em;
+        background: rgba(255,255,255,0.15);
+        padding: $gutter 1em;
+    }
+
     * {
         user-select: none;
     }
@@ -103,6 +109,7 @@ $gutter: 0.6em;
     .modal__base {
         width: 50%;
         top: 10%;
+        bottom: unset;
         left: 25%;
 
         .container-fluid {
