@@ -13,6 +13,7 @@ yarn-error.log
 
 .vscode
 
-server/Viixet_old.js
+server/files/*
+server/tmp/*
 
 .env

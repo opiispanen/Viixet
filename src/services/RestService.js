@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { EventBus } from '../Viixet/EventBus.js'
 
-const onTokenError = (response) => {
+const requestMiddleware = (response) => {
     const data = response.data;
 
     if (data.loginRequired === true) {
@@ -26,7 +26,7 @@ class RestService {
         if (!!urlAddition)
             url += urlAddition;
 
-        return axios.get(url).then(onTokenError)
+        return axios.get(url).then(requestMiddleware)
     }
 
     post(data = {}, urlAddition = false) {
@@ -35,7 +35,7 @@ class RestService {
         if (!!urlAddition)
             url += urlAddition;
 
-        return axios.post(url, data).then(onTokenError)
+        return axios.post(url, data).then(requestMiddleware)
     }
 
     update(id, data = {}, urlAddition = false) {
@@ -44,7 +44,7 @@ class RestService {
         if (!!urlAddition)
             url += urlAddition;
 
-        return axios.put(url, data).then(onTokenError)
+        return axios.put(url, data).then(requestMiddleware)
     }
 
     delete(id, urlAddition = false) {
@@ -53,7 +53,7 @@ class RestService {
         if (!!urlAddition)
             url += urlAddition;
 
-        return axios.delete(url).then(onTokenError)
+        return axios.delete(url).then(requestMiddleware)
     }
 }
 

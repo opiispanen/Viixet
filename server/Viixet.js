@@ -1,6 +1,8 @@
 const send = require('./send.js')
 const db = require('./dbInstance.js')
 const authScheme = process.env.DB_AUTH_SCHEME
+const tokenName = process.env.AUTH_TOKENNAME
+const threshold = 604800000; // 1 week // 45 * 60 * 1000; // 45 minutes
 
 const routes = {
     '/login': {
@@ -12,9 +14,17 @@ const routes = {
                 }
                 
             login(body.username, body.password)
-                .then((user) => {
-                    data.user = user;
+                .then((response) => {
+                    const auth = response.auth;
+                    data.user = response.user;
                     data.success = true;
+                    
+                    res.cookie(tokenName, auth.token, {
+                        expires: new Date(Date.now() + threshold),
+                        secure: req.protocol === 'https',
+                        httpOnly: true,
+                    });
+
                     send(res, data)
                 })
                 .catch((data) => send(
@@ -24,25 +34,25 @@ const routes = {
         }
     },
     '/logout': {
-        get: (req, res) => {
-            const
-                token = req.header('authorization'),
-                data = {
-                    success: false
-                }
+        get: (req, res, user) => {
+            const data = {
+                success: false
+            }
 
-            authenticate(token)
-                .then((user) => {
-                    clearToken(user.viixetId)
-                        .then(() => {
-                            data.success = true;
-                            send(res, data)
-                        })
-                })
-                .catch((err) => {
-                    data.error = err;
-                    send(res, data)
-                })
+            if (user !== false) {
+                clearToken(user.viixetId)
+                    .then(() => {
+                        data.success = true;
+                        res.clearCookie(tokenName);
+                        send(res, data)
+                    })
+                    .catch((err) => {
+                        data.error = err;
+                        send(res, data, 400)
+                    })
+            } else {
+                send(res, data, 401)
+            }
         }
     },
     '/registration': {
@@ -77,20 +87,17 @@ const routes = {
         }
     },
     '/authenticate': {
-        get: (req, res) => {
-            const token = req.header('authorization')
-
-            authenticate(token)
-                .then((user) => {
-                    send(res, {
-                        success: true,
-                        user: user
-                    })
+        get: (req, res, user) => {
+            if (user !== false) {
+                delete user.viixetId;
+                
+                send(res, {
+                    success: true,
+                    user: user
                 })
-                .catch((data) => send(
-                    res, 
-                    Object.assign(data, { success: false })
-                ))
+            } else {
+                send(res, { success: false }, 401)
+            }
         }
     }
 }
@@ -128,7 +135,10 @@ function registration(username, password, email) {
         {
             name: 'User name',
             data: username,
-            validate: [{ type: 'min', value: 2 }] 
+            validate: [
+                { type: 'min', value: 2 },
+                { type: 'regex', value: /^[a-zA-Z0-9._%@?!+-]+$/g }
+            ] 
         },
         {
             name: 'Password',
@@ -155,9 +165,9 @@ function registration(username, password, email) {
             ${ authScheme }user (username, password, email) 
         VALUES (?, ?, ?)`, 
         [ 
-            username, 
+            username.trim(), 
             db.hash(password),
-            email
+            email.trim()
         ]
     ).then((result, fields) => {
         if (!result || !result.insertId)
@@ -172,7 +182,6 @@ function login(username, password) {
         success: false,
         error: 'Login failed'
     }
-    let user = {}
         
     return db.q(
         `SELECT 
@@ -191,21 +200,22 @@ function login(username, password) {
         const row = result[0]
         
         return createToken(row['viixetId'])
-            .then((token) => {
-                user.username = row['username'];
-                user.email = row['email'];
-                user.token = token;
-
-                return user
+            .then((auth) => {
+                return {
+                    user: {
+                        username: row['username'],
+                        email: row['email']
+                    },
+                    auth
+                }
             })
     }).catch(() => {
         return Promise.reject(rejectMessage)
     })
 }
 
-function authenticate(token) {
+function authenticate(token, req, res) {
     const now = Date.now();
-    const threshold = 45 * 60 * 1000;
     const rejectMessage = {
         success: false,
         error: 'Token expired',
@@ -221,7 +231,7 @@ function authenticate(token) {
     )
     .then((result, fields) => {
         if (!result[0]) {
-            return Promise.reject(rejectMessage)
+            return Promise.reject({...rejectMessage, level:3})
         }
 
         const row = result[0]
@@ -229,18 +239,21 @@ function authenticate(token) {
         if (now - (new Date(row['valid'])).getTime() < threshold) {
             return getUser(row['viixetId'])
                 .then((user) => {
+                    res.cookie(tokenName, token, {
+                        expires: new Date(Date.now() + threshold),
+                        secure: req.protocol === 'https',
+                        httpOnly: true,
+                        overwrite: true
+                    });
                     updateTokenTime(row['token'], row['viixetId']);
                     return user;
                 })
+                .catch((error) => Promise.reject({...rejectMessage, level:1}))
         } else {
-            return Promise.reject(rejectMessage)
+            return Promise.reject({...rejectMessage, level:2})
         }
     })
-    .catch(() => {
-        rejectMessage.error = 'Token not valid';
-
-        return Promise.reject(rejectMessage);
-    })
+    .catch((error) => Promise.reject(error))
 }
 
 function createToken(viixetId) {
@@ -253,7 +266,9 @@ function createToken(viixetId) {
         VALUES (?, ?)`, 
         [ token, viixetId ]
     ).then((result, fields) => {
-        return token;
+        return {
+            token
+        };
     })
 }
 

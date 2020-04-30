@@ -3,6 +3,7 @@
     margin: 0;
     width: 100%;
     user-select: none;
+    z-index: zIndex('navbar');
 
     .container,
     .container-fluid {
@@ -44,7 +45,10 @@
 }
 
 body.has-navbar {
-    padding-top: calc(#{$navbarHeight} + 0.75em);
+    
+    .page.main-view {
+        padding-top: calc(#{$navbarHeight} + 0.75em);    
+    }
 }
 
 .navbar.navbar-fixed {

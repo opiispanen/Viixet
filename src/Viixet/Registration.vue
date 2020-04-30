@@ -7,7 +7,7 @@
             </span>
             <input type="email" name="email" v-model="email">
         </label>
-        <span class="badge badge-danger" v-if="email.length > 3 && emailLegit">
+        <span class="badge badge-danger" v-if="email !== null && !emailLegit">
             Not a proper email
         </span>
     </div>
@@ -16,10 +16,10 @@
             <span class="form-item--label">
                 Username
             </span>
-            <input type="text" name="username" v-model="username">
+            <input type="email" name="username" v-model="username">
         </label>
-        <span class="badge badge-danger" v-if="username.length > 3 && usernameLegit">
-            Username must be longer than 3 characters
+        <span class="badge badge-danger" v-if="username !== null && !usernameLegit">
+            Username must be longer than 3 characters and consist of only following characters: a-z, A-Z, 0-9, ., _, %, @, ?, !, +, - and no spaces.
         </span>
     </div>
     <div class="form-item">
@@ -37,7 +37,7 @@
             </span>
             <input type="password" name="password-repeat" v-model="passwordRepeat">
         </label>
-        <span class="badge badge-danger" v-if="password.length && passwordRepeat.length && !passwordLegit">
+        <span class="badge badge-danger" v-if="passwordRepeat !== null && password.length && passwordRepeat.length && !passwordLegit">
             Passwords don't match
         </span>
     </div>
@@ -84,20 +84,26 @@ export default {
     },
 	data: () => ({
         validForm: false,
-		username: '',
-		password: '',
-        passwordRepeat: '',
-        email: '',
+		username: null,
+		password: null,
+        passwordRepeat: null,
+        email: null,
         consent: false
 	}),
     computed: {
         emailLegit() {
             const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
 
-            return regex.test(this.username) 
+            return typeof this.email === 'string' 
+                && this.email.length > 3 
+                && regex.test(this.email) 
         },
         usernameLegit() {
-            this.username.length > 3
+            const regex = /^[a-zA-Z0-9._%@?!+-]+$/g
+            
+            return typeof this.username === 'string' 
+                && regex.test(this.username) 
+                && this.username.length > 3
         },
         passwordLegit() {
             return this.password === this.passwordRepeat;

@@ -80,6 +80,62 @@ CREATE TABLE IF NOT EXISTS `viixet`.`group_user` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `viixet`.`file`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `viixet`.`file` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `viixetId` INT UNSIGNED NOT NULL,
+  `created` DATETIME NOT NULL,
+  `modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `name` VARCHAR(85) NOT NULL,
+  `size` INT UNSIGNED NOT NULL,
+  `mime` VARCHAR(45) NOT NULL,
+  `uuid` VARCHAR(64) NOT NULL,
+  `checksum` VARCHAR(32) NOT NULL,
+  `width` TINYINT UNSIGNED NULL,
+  `height` TINYINT UNSIGNED NULL,
+  `deleted` TINYINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_file_user1_idx` (`viixetId` ASC),
+  CONSTRAINT `fk_file_user1`
+    FOREIGN KEY (`viixetId`)
+    REFERENCES `viixet`.`user` (`viixetId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `viixet`.`filequota`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `viixet`.`filequota` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `viixetId` INT UNSIGNED NOT NULL,
+  `groupId` INT UNSIGNED NULL,
+  `quota` INT NOT NULL,
+  `maxsize` INT NOT NULL,
+  `mimetypes` VARCHAR(255) NULL,
+  `active` TINYINT NOT NULL,
+  `created` DATETIME NOT NULL,
+  `modified` TIMESTAMP NOT NULL,
+  `messages` TEXT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_filequota_user1_idx` (`viixetId` ASC),
+  INDEX `fk_filequota_group1_idx` (`groupId` ASC),
+  CONSTRAINT `fk_filequota_user1`
+    FOREIGN KEY (`viixetId`)
+    REFERENCES `viixet`.`user` (`viixetId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_filequota_group1`
+    FOREIGN KEY (`groupId`)
+    REFERENCES `viixet`.`group` (`groupId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

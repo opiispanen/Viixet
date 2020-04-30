@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
     props: {
         headings: {
@@ -35,6 +37,11 @@ export default {
         unit: 0,
         active: 0
     }),
+    computed: {
+        ...mapGetters({
+            isMobile: 'isMobile'
+        }),
+    },
     methods: {
         setActive(index) {
             this.toggle(false, this.active);
@@ -46,6 +53,12 @@ export default {
             const content = Array.prototype.slice.call(this.$refs.content.children);
             
             content[index].style.display = show ? 'block' : 'none'
+        }
+    },
+    watch: {
+        isMobile() {
+            this.unit = 100 / this.headings.length;
+            this.$forceUpdate();
         }
     },
     mounted() {

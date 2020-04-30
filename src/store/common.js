@@ -1,10 +1,10 @@
 import settings from '../settings'
+import languages from '../translations'
 
 export default {
     state: {
-        loggedIn: false,
-        username: '',
         lang: localStorage['ViixetLang'] || settings.defaultLang,
+        languages,
         showModal: false,
         sideDrawerOpened: false,
         activePortal: '',
@@ -13,6 +13,26 @@ export default {
         isMobileSize: false
     },
     getters: {
+        isMobile(state) {
+            return state.isMobileSize;
+        },
+        translate(state) {
+            return (placeholder) => {
+                const activeLang = state.languages[state.lang] || {};
+                
+                if (!activeLang[placeholder]) {
+                    if (typeof window.missingTranslations === 'undefined') {
+                        window.missingTranslations = {}
+                    } else if (typeof window.missingTranslations[placeholder] === 'undefined') {
+                        window.missingTranslations[placeholder] = '';
+                    }
+
+                    return placeholder;
+                }
+        
+                return activeLang[placeholder];
+            }
+        }
     },
     mutations: {
         setLang(state, lang) {
@@ -33,14 +53,6 @@ export default {
         },
         setIsMobile(state, value) {
             state.isMobileSize = value;
-        },
-        login(state, obj) {
-            state.loggedIn = obj.loggedIn;
-            state.username = obj.username;
-        },
-        logout(state) {
-            state.loggedIn = false;
-            state.username = '';
         }
     },
     actions: {

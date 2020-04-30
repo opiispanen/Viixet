@@ -11,8 +11,8 @@
                             <li>Viixet.com doesn't have any organisation behind it.</li>
                             <li>Using your real name as your username is not recommended. Username is not handled as personal data.</li>
                             <li>Everything you publish is on your responsibility. Behave and sharing any personal information is not encouraged.</li>
-                            <li>Personal data like your IP, full name, address or email are not stored on the server or shared to 3rd parties in any way.</li>
                             <li>The server itself is physically located in Amsterdam, Netherlands (<a href="https://digitalocean.com" target="_blank">@DigitalOcean</a>)</li>
+                            <li>By registering you accept all these conditions.</li>
                         </ul>
                         <registration @onLogin="onLogin"></registration>
                     </div>

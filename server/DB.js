@@ -1,6 +1,8 @@
 const mysql = require('mysql')
 const sha256 = require('sha256')
+const emailValidator = require('email-validator')
 const sanitizeHtml = require('sanitize-html')
+let dateFields = ['created', 'modified']
 
 class DB {
     /**
@@ -12,6 +14,9 @@ class DB {
         this.pool = mysql.createPool(settings);
     }
 
+    setDateFields(fields) {
+        dateFields = ['created','modified',...fields];
+    }
     /**
      * 
      * @param {String} string 
@@ -43,10 +48,12 @@ class DB {
                 this, 
                 query, 
                 link,
-                (err, result, fields) => {
-                    if (err) reject(err, fields)
+                (err, rows, fields) => {
+                    if (err) reject(err)
                     else {
-                        resolve(result, fields);
+                        const result = rows && (!!rows.length || !!rows.insertId || !!rows.affectedRows) ? rows : [];
+
+                        resolve(result);
                     }
                 }
             )
@@ -55,9 +62,12 @@ class DB {
 
     mapDates(obj) {
         const dateToTimestamp = (date) => (new Date(date)).getTime();
-
-        obj.created = dateToTimestamp(obj.created);
-        obj.modified = dateToTimestamp(obj.modified);
+        
+        dateFields.forEach(name => {
+            if (!!obj[name]) {
+                obj[name] = dateToTimestamp(obj[name]);
+            }
+        })
 
         return obj;
     }
@@ -74,8 +84,8 @@ class DB {
      * 
      * @param {String} dirty 
      */
-    sanitize(dirty) {
-        return sanitizeHtml(dirty)
+    sanitize(dirty, settings = {}) {
+        return sanitizeHtml(dirty, settings)
     }
 
     /**
@@ -83,9 +93,7 @@ class DB {
      * @param {String} email 
      */
     validateEmail(email) {
-        const regex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g;
-
-        return regex.test(email) 
+        return emailValidator.validate(email);
     }
 
     /**
@@ -123,6 +131,18 @@ class DB {
                     case 'enum':
                         if (validate.value.indexOf(data) < 0)
                             errors.push(`${ field.name } is not valid value`)
+                    break;
+                    case 'datatype':
+                        if (typeof validate.value !== validate.type)
+                            errors.push(`${ field.name } is not correct type`)
+                    break;
+                    case 'regex':
+                        if (validate.value instanceof RegExp) {
+                            if (!validate.value.test(data))
+                                errors.push(`${ field.name } is not correct type`)
+                        } else {
+                            errors.push(`${ field.name } validation rule is not valid`)
+                        }
                     break;
                 }
             })

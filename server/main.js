@@ -4,6 +4,7 @@
 require('dotenv').config()
 // Load all the npm based depedencies needed here
 const express = require('express')
+const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser')
 
 const initRoutes = require('./initRoutes.js')
@@ -12,6 +13,8 @@ const initRoutes = require('./initRoutes.js')
 const app = express()
 const port = process.env.SERVER_PORT
 
+app.disable('x-powered-by')
+app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true

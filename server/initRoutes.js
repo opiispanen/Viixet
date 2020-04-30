@@ -1,6 +1,7 @@
 const Viixet = require('./Viixet.js')
 const send = require('./send.js')
 const routes = require('./routes.js')
+const tokenName = process.env.AUTH_TOKENNAME
 
 const methods = ['get','post','put','delete']
 
@@ -12,32 +13,44 @@ function initRoutes(app) {
         .forEach((name) => {
             const route = routes[name]
             
-            // The register function takes the route from its
-            // surrounding scope and registers the method, name
-            // and route to the Express app defined earlier (named "app")
-            const register = (method) => {
-                // If the route is defined to be behind authentication,
-                // define a Viixet middleware for authentication
-                if (route.authenticate && route.authenticate[method])
-                    app[method](name, (req, res) => {
-                        const token = req.header('authorization')
+            const registerRoute = (method) => {
+                const authRequired = route.authenticate && route.authenticate[method];
+                const publicRoute = !route.authenticate || !route.authenticate[method];
 
-                        Viixet.authenticate(token)
-                            .then((user) => {
-                                // If the user is authenticated, just call
-                                // the original route method with req, res
-                                // provided along with the user object for
-                                // further usage
-                                route[method](req, res, user)
-                            })
-                            // User was not authenticated, handle the error
-                            .catch((data) => send(
+                app[method](name, async (req, res) => {
+                    const token = req.cookies[tokenName] || false;
+                    
+                    try {
+                        const user = await Viixet.authenticate(token, req, res)
+                        let allow = false;
+    
+                        if (authRequired && user !== false) {
+                            allow = true;
+                        } else if (publicRoute) {
+                            allow = true;
+                        }
+    
+                        if (allow) {
+                            route[method](req, res, user)
+                        } else {
+                            send(
                                 res, 
-                                Object.assign(data, { success: false })
-                            ))
-                    })
-                else
-                    app[method](name, route[method]) // public route registration
+                                { success: false, error: 'USER_NOT_ALLOWED_2' },
+                                401
+                            )
+                        }
+                    } catch (err) {
+                        if (publicRoute) {
+                            route[method](req, res, false)
+                        } else {
+                            send(
+                                res, 
+                                { success: false, error: 'USER_NOT_ALLOWED_1', err },
+                                401
+                            )
+                        }
+                    }
+                })
             }
             
             // Iterate through supported methods and register routes
@@ -45,7 +58,7 @@ function initRoutes(app) {
                 // Check if active route has the actual 
                 // method iterated here
                 if (!!route[method])
-                    register(method)
+                    registerRoute(method)
             })
         })
 }

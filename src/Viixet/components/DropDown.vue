@@ -135,4 +135,9 @@ export default {
         }
         
     }
+    
+    .dropdown__button > * > * {
+        pointer-events: none;
+        cursor: pointer;
+    }
 </style>

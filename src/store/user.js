@@ -2,11 +2,10 @@ import axios from 'axios'
 import settings from '../settings'
 
 const storageSpace = settings.userStorage;
-const threshold = (45 * 60 * 1000) / 2;
 const user = {
     viixetId: null,
-    token: null,
-    username: null
+    username: null,
+    authenticated: false
 }
 
 export default {
@@ -17,24 +16,23 @@ export default {
         otherwise: settings.defaultOtherwise || '/',
         callbackState: '/',
         callbacks: [],
-        authenticated: 0,
-        heartbeatId: null,
+        afterLogin: [],
         baseUrl: ''
     },
     getters: {
-        token(state) {
-            return state.user.token;
-        },
         isLoggedIn(state) {
-            return !!state.user.token;
+            return !!state.user.authenticated;
         },
-        authenticated(state) {
-            return Date.now() - state.authenticated < threshold;
+        username(state) {
+            return state.user.username;
         }
     },
     mutations: {
         setFirstLoad(state, value) {
             state.firstLoad = value;
+        },
+        setAfterLogin(state, afterLogin) {
+            state.afterLogin = afterLogin;
         },
         setCallbacks(state, callbacks) {
             state.callbacks = callbacks;
@@ -51,60 +49,36 @@ export default {
             context.state.callbackState = '/'
             context.state.callbacks = []
         },
-        setToken(context, token) {
-            axios.defaults.headers.common['authorization'] = token;
+        userLoggedIn(context) {
+            axios.defaults.headers.common['withCredentials'] = true;
             
-            context.state.authenticated = Date.now();
-            context.dispatch('tokenHeartbeat');
+            context.state.user.authenticated = true;
         },
-        removeToken(context) {
-            axios.defaults.headers.common['authorization'] = '';
-            context.state.user.token = '';
-            context.state.authenticated = 0;
+        userLoggedOut(context, source = '') {
+            axios.defaults.headers.common['withCredentials'] = false;
+            context.state.user.authenticated = false;
             context.dispatch('delete').catch(() => {})
-        },
-        tokenHeartbeat(context, authenticate = false) {
-            if (!!context.state.heartbeatId) {
-                clearTimeout(context.state.heartbeatId);
-            }
-    
-            if (authenticate) {
-                context.dispatch('authenticate')
-                    .then((response) => {
-                        const data = response.data;
-        
-                        if (data.success) {
-                            context.state.authenticated = Date.now();
-                        } else {
-                            context.dispatch('removeToken');
-                        }
-                    }).catch(() => {
-                        context.dispatch('removeToken');
-                    })
-            }
-    
-            setTimeout(() => {
-                context.dispatch('tokenHeartbeat', true)
-                    .then((result) => {
-                        context.state.heartbeatId = result;
-                    })
-            }, threshold);
         },
         authenticate(context) {
             return axios.get(context.state.baseUrl + 'authenticate')
                 .then((response) => {
                     const data = response.data;
-        
-                    if (data.success) {
-                        context.state.authenticated = Date.now();
-                    } else {
-                        context.dispatch('removeToken')
 
-                        if (authenticationFail)  {
-                            return Promise.reject();
+                    if (data.success) {
+                        context.state.user = {
+                            ...data.user,
+                            authenticated: true
                         }
+                        context.state.afterLogin.forEach(callback => callback());
+
+                        return response;
+                    } else {
+                        return Promise.reject();
                     }
-                }).catch(() => context.dispatch('removeToken'))
+                }).catch(() => {
+                    context.dispatch('userLoggedOut','authenticate')
+                    return Promise.reject()
+                })
         },
         login(context, details) {
             return new Promise((resolve, reject) => {
@@ -113,13 +87,11 @@ export default {
                     const data = response.data;
                     
                     if (data.success) {
-                        context.state.user.token = data.user.token;
-                        context.state.user.username = data.user.username;
-                        context.state.user.viixetId = data.user.viixetId;
-    
-                        context.dispatch('setToken', data.user.token);
+                        context.state.user = data.user;
+                        context.dispatch('userLoggedIn');
                         context.dispatch('save');
-    
+                        context.state.afterLogin.forEach(callback => callback())
+
                         resolve({
                             success: true
                         })
@@ -134,31 +106,18 @@ export default {
         },
         logout(context) {
             return axios.get(context.state.baseUrl + 'logout').then(() => {
-                context.dispatch('removeToken');
+                context.dispatch('userLoggedOut','logout');
             })
         },
         registration(context, user) {
             return axios.post(context.state.baseUrl + 'registration', user)
         },
-        load(context) {
-            const storage = localStorage[storageSpace]
-    
-            if (!!storage) {
-                const data = JSON.parse(storage)
-    
-                context.state.user.token = data.token;
-                context.state.user.username = data.username;
-                context.state.user.viixetId = data.viixetId;
-    
-                context.dispatch('setToken', data.token)
-
-                return Promise.resolve()
-            }
-    
-            return Promise.reject()
-        },
         save(context) {
-            localStorage[storageSpace] = JSON.stringify(context.state.user)
+            const userData = {
+                ...context.state.user,
+                timestamp: Date.now()
+            }
+            localStorage[storageSpace] = JSON.stringify(userData)
         },
         delete() {
             const storage = localStorage[storageSpace]
@@ -170,6 +129,23 @@ export default {
             }
     
             return Promise.reject()
+        },
+        behindWall(context, helper) {
+            const otherwise = context.state.otherwise;
+            const firstLoad = context.state.firstLoad;
+            const initLoginModal = () => {
+                context.commit('setCallbackState', helper.to.path)
+                context.commit('setCallbacks', [() => context.commit('toggleModal', false, { root:true })])
+                context.commit('setActivePortal','user-modal', { root:true })
+                context.commit('toggleModal', true, { root:true })
+                helper.next(otherwise)
+            }
+
+            context.dispatch('authenticate')
+                .then((response) => helper.next())
+                .catch((err) => initLoginModal())
+            
+            context.commit('setFirstLoad', false)
         }
     }
 }

@@ -1,13 +1,22 @@
 <template>
-<div class="navtabs">
-    <div class="container bg-primary-gradient">
-        <slot></slot>
+<div class="nav navtabs"
+    :class="{
+        'navtabs__left': position === 'left'
+    }">
+    <div class="container"
+        :style="{
+            padding: !isMobile && position === 'left' ? `${paddingVertical}px 0` : ''
+        }">
+        <div class="row">
+            <slot></slot>
+        </div>
     </div>
 </div>
 </template>
 
 <script>
 import Vue from 'vue';
+import { mapGetters } from 'vuex'
 import dom from './DomService.js';
 
 Vue.directive('nav-tab', function (el, binding) {
@@ -21,8 +30,33 @@ Vue.directive('nav-tab-label', function(el) {
     el.classList.add('navtabs__item__label');
 });
 
+/*
+    :class="[
+        position === 'left' ? 'navtabs__left' : '',
+        tabCount > 0 ? 'test-'+tabCount : ''
+    ]"
+*/
+
 export default {
     name: 'nav-tabs',
+    props: {
+        position: {
+            type: String,
+            required: false,
+            default: 'bottom'
+        }
+    },
+    data: () => ({
+        tabCount: 0
+    }),
+    computed: {
+        ...mapGetters({
+            isMobile: 'isMobile'
+        }),
+        paddingVertical() {
+            return ((window.innerHeight * 0.5) - this.tabCount * 40) * 0.5
+        }
+    },
     mounted() {
         const tabOnChange = () => {
             const tabCount = this.$el.querySelectorAll('.navtabs__item').length;
@@ -33,62 +67,49 @@ export default {
                 this.$el.classList.add('tab-count-'+tabCount);
             else 
                 this.$el.classList.add('tab-notext');
+
+            this.tabCount = tabCount;
         };
         
-        document.body.classList.add('has-navtabs');
+        switch(this.position) {
+            case 'bottom':
+                document.body.classList.add('has-navtabs');
+            break;
+            case 'left': 
+                document.body.classList.add('has-navtabs-left');
+            break;
+        }
+        if (this.position === 'bottom') {
+            document.body.classList.add('has-navtabs');
+        }
+        
         tabOnChange();
 
         this.$el.addEventListener(
             'DOMNodeInserted', 
-            setTimeout.bind(null, tabOnChange, 0), 
+            () => this.$nextTick(tabOnChange),
             false
         );
     },
     watch: {
         '$route': function(value) {
-            dom.enableScroll();
+            //dom.enableScroll();
+        },
+        isMobile(value) {
+            if (this.position === 'left') {
+                if (value) {
+                    document.body.classList.remove('has-navtabs-left');
+                    document.body.classList.add('has-navtabs');
+                } else {
+                    document.body.classList.remove('has-navtabs');
+                    document.body.classList.add('has-navtabs-left');
+                }
+            }
         }
     }
 }
 </script>
 
 <style lang="scss">
-.navtabs {
 
-    a.router-link-exact-active {
-        font-weight: 900;
-        opacity: 1;
-    }
-
-    .container {
-        box-shadow: 0 -3px 10px -3px #666;
-    }
-}
-
-.navtabs.tab-count-4 {
-    .navtabs__item__label {
-        font-size: 0.55em;
-    }
-}
-
-.navtabs.tab-notext {
-    height: 2.5em;
-
-    .navtabs__item__label {
-        display: none;
-    }
-
-    a {
-        padding: 0.6em 0;
-    }
-}
-
-@media only screen and (min-width: 48em) {
-    .navtabs {
-        .container {
-            border-top-left-radius: 1.35em;
-            border-top-right-radius: 1.35em;
-        }
-    }
-}
 </style>

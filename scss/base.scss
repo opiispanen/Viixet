@@ -77,6 +77,13 @@ ul, ol {
     padding-left: 1.2em;
 }
 
+.page {
+    position:absolute;
+    width:100%;
+    top:0em;
+    left:0;
+}
+
 .dropdown {
     ul, ol {
         padding-left: 0em;
@@ -230,7 +237,7 @@ $alignments: left center right;
     display: none;
 }
 
-.hidden-xs {
+.hidden-lg {
     display: none;
 }
 
@@ -239,34 +246,29 @@ $alignments: left center right;
     padding-right: 0.5em;
 }
 
+@media only screen and (max-width: 48em) {
+    .hidden-xs {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 64em) {
+    .hidden-sm {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 75em) {
+    .hidden-md {
+        display: none;
+    }
+}
+
 @media only screen and (min-width: 48em) {
     .container {
         padding-left: 0;
         padding-right: 0;
     }
 
-    [class*="hidden-"] {
-        display: block;
-    }
-    .hidden-sm {
-        display: none;
-    }
-}
-
-@media only screen and (min-width: 64em) {
-    [class*="hidden-"] {
-        display: block;
-    }
-    .hidden-md {
-        display: none;
-    }
-}
-
-@media only screen and (min-width: 75em) {
-    [class*="hidden-"] {
-        display: block;
-    }
-    .hidden-lg {
-        display: none;
-    }
+    
 }

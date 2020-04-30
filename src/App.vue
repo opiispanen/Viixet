@@ -16,7 +16,7 @@
 			</span>
 		</div>
 	</nav-bar>
-	<router-view></router-view>
+	<router-view class="main-view"></router-view>
     <basic-modal
         :show="$store.state.showModal" 
         :wide="false"
@@ -45,7 +45,7 @@ export default {
         logout() {
             this.$store.dispatch('user/logout')
                 .then(() => {
-                    this.$router.push('/splash')
+                    this.$router.push('/')
                 })
         }
 	},

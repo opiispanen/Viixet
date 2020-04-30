@@ -1,8 +1,8 @@
 <template>
 <page>
 	<div class="row">
-		<div class="col-xs-12">
-			<h1>Yay, logged in!</h1>
+		<div class="col-xs-8 col-xs-offset-2">
+			<h1>404 Page not found</h1>
 		</div>
 	</div>
 </page>
@@ -11,7 +11,7 @@
 <script>
 import Page from '../components/Page.vue'
 export default {
-	name: 'app',
+	name: 'pagenotfound',
 	components: {
 		Page
 	},

@@ -5,58 +5,45 @@ import store from './store.js'
 // lazy loaded 
 const Viixet = () => import('./views/Viixet.vue')
 const Splash = () => import('./views/Splash.vue')
+const PageNotFound = () => import('./views/PageNotFound.vue')
 
 Vue.use(VueRouter)
 
-store.dispatch('user/load')
-store.commit('user/setOtherwise', '/splash')
+store.commit('user/setAfterLogin', [
+    // functions to run after login, usually store.dispatch actions
+    // () => store.dispatch('yourAction')
+])
+store.commit('user/setOtherwise', '/')
 
-const behindWall = (to, from, next) => {
-    const token = store.getters['user/token'];
-    const authenticated = store.getters['user/authenticated'];
-    const otherwise = store.state.user.otherwise;
-    const firstLoad = store.state.user.firstLoad;
-    const initLoginModal = () => {
-        store.commit('user/setCallbackState', to.path)
-        store.commit('user/setCallbacks', [() => store.commit('toggleModal', false)])
-        store.commit('setActivePortal','user-modal')
-        store.commit('toggleModal', true)
-    }
-    
-    if (!token) {
-        store.dispatch('user/removeToken')
-        initLoginModal()
-        next(otherwise)
-        return;
-    }
-
-    if (authenticated && !firstLoad) {
-        next();
-        return;
-    }
-
-    store.commit('user/setFirstLoad', false)
-    store.dispatch('user/authenticate')
-        .then(() => next())
-        .catch(() => {
-            initLoginModal()
-            next(otherwise)
-        })
-}
+const authRequired = ['Viixet'];
+//const behindWall = (to, from, next) => store.dispatch('user/behindWall', { to, from, next });
 const routes = [
     { 
-        path: '/', 
+        path: '/dashboard', 
         name:'Viixet', 
-        component: Viixet,
-        beforeEnter: behindWall
+        component: Viixet
     },
     {
-        path: '/splash',
+        path: '/',
         name: 'Splash',
         component: Splash
+    },
+    {
+        path: '*', 
+        component: PageNotFound 
     }
 ]
 
-export default new VueRouter({
-    routes
+const router = new VueRouter({
+    routes: routes
 })
+
+router.beforeEach((to, from, next) => {
+    if (authRequired.indexOf(to.name) > -1) {
+        store.dispatch('user/behindWall', { to, from, next })
+    } else {
+        next();
+    }
+})
+
+export default router
