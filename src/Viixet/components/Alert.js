@@ -2,7 +2,7 @@ let modalBg = 'bg-darkgrey';
 const generateTemplate = (message, buttons) => `<div class="modal">
     <div class="modal__backdrop"></div>
     <div class="modal__base card-base ${ modalBg }">
-        <div class="container-fluid" style="padding-top: 1em;padding-bottom: 1em;">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-xs" style="text-align: center;">
                     ${ message }

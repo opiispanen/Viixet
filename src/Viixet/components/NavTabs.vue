@@ -1,15 +1,14 @@
 <template>
 <div class="nav navtabs"
     :class="{
-        'navtabs__left': position === 'left'
+        'navtabs__left': position === 'left',
+        'navtabs__tight': viewMode === 'tight'
     }">
-    <div class="container"
-        :style="{
-            padding: !isMobile && position === 'left' ? `${paddingVertical}px 0` : ''
+    <div class="flex" 
+        :class="{ 
+            'hero': viewMode === 'centered'
         }">
-        <div class="row">
-            <slot></slot>
-        </div>
+        <slot></slot>
     </div>
 </div>
 </template>
@@ -20,22 +19,12 @@ import { mapGetters } from 'vuex'
 import dom from './DomService.js';
 
 Vue.directive('nav-tab', function (el, binding) {
-    //el.parentNode.classList.add('row');
-    
     el.classList.add('navtabs__item');
-    el.classList.add('col-xs');
 });
 
 Vue.directive('nav-tab-label', function(el) {
     el.classList.add('navtabs__item__label');
 });
-
-/*
-    :class="[
-        position === 'left' ? 'navtabs__left' : '',
-        tabCount > 0 ? 'test-'+tabCount : ''
-    ]"
-*/
 
 export default {
     name: 'nav-tabs',
@@ -44,6 +33,11 @@ export default {
             type: String,
             required: false,
             default: 'bottom'
+        },
+        viewMode: {
+            type: String,
+            required: false,
+            default: 'centered'
         }
     },
     data: () => ({
@@ -52,13 +46,28 @@ export default {
     computed: {
         ...mapGetters({
             isMobile: 'isMobile'
-        }),
-        paddingVertical() {
-            return ((window.innerHeight * 0.5) - this.tabCount * 40) * 0.5
+        })
+    },
+    methods: {
+        onMobileChange(value) {
+            if (this.position === 'left') {
+                if (value) {
+                    document.body.classList.remove('has-navtabs-left');
+                    document.body.classList.add('has-navtabs');
+                } else {
+                    document.body.classList.remove('has-navtabs');
+                    document.body.classList.add('has-navtabs-left');
+                }
+            }
         }
     },
     mounted() {
         const tabOnChange = () => {
+            if (!this.isMobile && this.viewMode === 'tight') {
+                this.$el.className = this.$el.className.replace(/tab-count-\d/g, '');    
+                return;
+            }
+
             const tabCount = this.$el.querySelectorAll('.navtabs__item').length;
             
             this.$el.className = this.$el.className.replace(/tab-count-\d/g, '');
@@ -83,6 +92,7 @@ export default {
             document.body.classList.add('has-navtabs');
         }
         
+        this.onMobileChange(this.isMobile);
         tabOnChange();
 
         this.$el.addEventListener(
@@ -96,15 +106,7 @@ export default {
             //dom.enableScroll();
         },
         isMobile(value) {
-            if (this.position === 'left') {
-                if (value) {
-                    document.body.classList.remove('has-navtabs-left');
-                    document.body.classList.add('has-navtabs');
-                } else {
-                    document.body.classList.remove('has-navtabs');
-                    document.body.classList.add('has-navtabs-left');
-                }
-            }
+            this.onMobileChange(value);
         }
     }
 }

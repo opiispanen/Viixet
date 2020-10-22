@@ -7,7 +7,8 @@ input, textarea, button, .button, select {
 }
 
 .form-item {
-    margin: 0.3em 0.1em;
+    //margin: 0;//0.3em 0.1em;
+    margin-bottom: 0.5rem;
 
     label:not(.label-inline) {
         display: block;
@@ -20,9 +21,10 @@ input, textarea, button, .button, select {
 
         button, .button {
             position: absolute;
-            bottom: -0.3em;
-            right: -0.2em;
-            padding: 0.6rem 0.7rem;
+            bottom: 0;
+            right: 0;
+            padding: 0.45em 0.5em;
+            font-size: 1.2em;
             min-width: 2.5em;
             box-shadow: none;
         }
@@ -36,8 +38,8 @@ input, textarea, button, .button, select {
     textarea,
     select {
         width: 100%;
-        padding: 0.36em 0.5em;
-        font-size: 1.15em;
+        padding: 0.4em 0.5em;
+        font-size: 1.2em;
 
         @if setting(input_enableBorders) == 1 {
             border-width: setting(input_borderWidth);
@@ -71,18 +73,29 @@ input, textarea, button, .button, select {
 }
 
 .button-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    /*
+    > * {
+        flex-grow: 1;
+        flex-basis: 0;
+    }
+    */
     button,
     .button {
         border-radius: 0;
         margin-left: -0.25rem;
         margin-right: 0;
         padding: 0.7rem 0.9rem;
+        box-shadow: none;
     }
 
     > * {
         button,
         .button {
             margin-left: 0rem;
+            box-shadow: none;
         }
     }
 
@@ -123,11 +136,11 @@ button,
     flex-direction: row;
     */
     background: $grey;
-    font-size: 1rem;
+    font-size: 1.2em;
     padding: 0.5rem 0.7rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     user-select: none;
-    margin: 0.3em 0.1em;
+    margin: 0;//0.3em 0.1em;
     
     text-align: center;
     /*
@@ -146,6 +159,20 @@ button,
 
     * {
         pointer-events: none;
+    }
+}
+
+.fixed-bottom-right {
+    position: fixed;
+    bottom: .5em;
+    right: .5em;
+    display: block;
+    z-index: zIndex(navtabs) !important;
+}
+
+@media only screen and (max-width: 48em) and (orientation: portrait) {
+    .fixed-bottom-right {
+        bottom: 3em;
     }
 }
 
@@ -255,11 +282,11 @@ button:disabled,
         border: 1px solid color(#{$color});
         */
     }
-
+    /*
     .button.button-#{$color}.button-bare:hover {
         border: 1px solid transparent;
     }
-
+    */
     .button.button-#{$color}:active {
         color: $white;
         background: color(dark#{$color});
@@ -270,11 +297,11 @@ button:disabled,
         background: none;
         border: 1px solid transparent;
     }
-
+    /*
     .button.button-#{$color}-dark.button-bare:hover {
         border: 1px solid transparent;
     }
-
+    */
     .button.button-#{$color}-dark:active {
         color: $white;
         background: color(dark#{$color});

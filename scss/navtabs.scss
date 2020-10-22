@@ -15,7 +15,13 @@ body.has-navtabs {
     }
 }
 
-
+@media only screen and (min-width: 48em) and (orientation: portrait) {
+    body.has-navtabs-left {
+        .modal__base {
+            left: calc(25% + #{$navtabHeight});
+        }
+    }
+}
 
 .navtabs {
     position: fixed;
@@ -70,7 +76,7 @@ body.has-navtabs {
         opacity: 1;
     }
 
-    .container {
+    .flex {
         box-shadow: 0 -1px 3px rgba(0,0,0,0.12), 0 -1px 2px rgba(0,0,0,0.24);
         padding: 0;
         height: 100%;
@@ -78,7 +84,7 @@ body.has-navtabs {
 }
 
 .navtabs.navtab__seamless {
-    .container {
+    .flex {
         box-shadow: none;
     }
 }
@@ -101,11 +107,15 @@ body.has-navtabs {
     }
 }
 
-
+@media only screen and (max-height: 319px) and (orientation: landscape) {
+    .navtabs {
+        display: none;
+    }
+}
 
 @media only screen and (min-width: 48em) {
     .navtabs {
-        .container {
+        .flex {
             border-top-left-radius: setting('navtabBorderRadius');
             border-top-right-radius: setting('navtabBorderRadius');
         }
@@ -117,18 +127,39 @@ body.has-navtabs {
         }
     }
 
+    .navtabs.navtabs__right.navtabs__tight,
+    .navtabs.navtabs__left.navtabs__tight {
+        .navtabs__item {
+            flex-basis: 5em;
+            max-height: 5em;
+        }
+
+        .flex {
+            padding: 0.5em 0;
+        }
+    }
+
     .navtabs.navtabs__right,
     .navtabs.navtabs__left {
         width: $navtabHeight * 2;
         height: 100%;
-    
-        .container {
+        
+        .flex {
             width: $navtabHeight * 2;
             height: 100%;
     
             .row {
                 flex-direction: column;
             }
+        }
+
+        .flex {
+            flex-direction: column;
+        }
+
+        .navtabs__item {
+            flex-basis: 20%;
+            max-height: 20%;
         }
     }
 

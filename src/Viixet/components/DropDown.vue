@@ -68,10 +68,12 @@ export default {
     },
     watch: {
         show(val, oldVal) {
+            /*
             if (val)
                 dom.disableScroll();
             else
                 dom.enableScroll();
+            */
         }
     }
 }
@@ -130,7 +132,7 @@ export default {
             }
 
             li {
-                padding: 1.6em 0.25em 1.6em 1.25em;
+                padding: 1.25em .75em 1.25em 1.25em;
             }
         }
         

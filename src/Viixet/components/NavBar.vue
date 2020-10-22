@@ -1,5 +1,5 @@
 <template>
-<div class="navbar" 
+<div class="nav navbar" 
      :class="{ 
         'navbar-fixed': fixed,
         'blur': blur
@@ -8,6 +8,7 @@
             'container': !fluid,
             'container-fluid': fluid,
             'no-gutter': noGutter,
+            'no-shadow': noShadow,
             'rounded': rounded,
             'chopped': chopped
         }">
@@ -40,6 +41,10 @@ export default {
             required: false
         },
         noGutter: {
+            type: Boolean,
+            required: false
+        },
+        noShadow: {
             type: Boolean,
             required: false
         },
@@ -76,15 +81,5 @@ export default {
 </script>
 
 <style lang="scss">
-.navbar {
 
-    [class*="col-xs"] {
-        animation-duration: 0.15s;
-    }
-
-    .container,
-    .container-fluid {
-        box-shadow: 0 3px 10px -3px rgba(44, 44, 44, 0.75);
-    }
-}
 </style>

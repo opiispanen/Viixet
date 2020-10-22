@@ -1,5 +1,5 @@
 <template>
-<div class="tabs-master">
+<div class="tabs-master" ref="master">
     <div class="tabs row">
         <div class="tab col-xs" 
             v-for="(heading, index) in headings"
@@ -44,6 +44,10 @@ export default {
     },
     methods: {
         setActive(index) {
+            if (index < 0 || index >= this.headings.length) {
+                return;
+            }
+
             this.toggle(false, this.active);
             this.toggle(true, index);
 
@@ -53,6 +57,10 @@ export default {
             const content = Array.prototype.slice.call(this.$refs.content.children);
             
             content[index].style.display = show ? 'block' : 'none'
+        },
+        update() {
+            this.unit = 100 / this.headings.length;
+            this.$forceUpdate();
         }
     },
     watch: {
@@ -65,6 +73,17 @@ export default {
         this.setActive(0)
 
         this.unit = 100 / this.headings.length;
+
+        if (typeof window.Hammer !== 'undefined') {
+            const master = this.$refs.master;
+            const mc = new Hammer(master);
+
+            mc.on('swipeleft swiperight', (ev) => {
+                const index = this.active + (ev.type === 'swipeleft' ? 1 : -1)
+                
+                this.setActive(index)
+            });
+        }
     }
 }
 </script>

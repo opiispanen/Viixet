@@ -1,6 +1,6 @@
 <template>
 <portal to="user-modal">
-    <div class="container-fluid" style="padding-top: 1em;padding-bottom: 1em;">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-xs-12">
                 <tabs :headings="['Login','Registration']">
@@ -24,7 +24,7 @@
                 <button 
                     @click="$store.commit('toggleModal', false)" 
                     class="button button-primary button-bare">
-                    <span>{{ $translate($store.state.lang, 'CANCEL') }}</span>
+                    <span>{{ $translate('CANCEL') }}</span>
                 </button>
             </div>
             <div class="col-xs" style="text-align:right;">

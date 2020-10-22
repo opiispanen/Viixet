@@ -4,7 +4,7 @@
         'switch': switcher,
         'selected': selected
     }">
-        <span class="form-item--label" v-if="!switcher">{{ label }}</span>
+        <span class="form-item--label" v-if="!label || !switcher">{{ label }}</span>
         <slot></slot>
         <span v-if="switcher">{{ label }}</span>
     </label>
@@ -16,7 +16,7 @@ export default {
     name: 'form-input',
     props: {
         label: {
-            required: true,
+            required: false,
             type: String
         },
         switcher: {
@@ -34,11 +34,15 @@ export default {
         this.$nextTick(() => {
             const master = this.$refs.master;
             const input = master.querySelector('input');
-
+            
             if (input) {
                 input.addEventListener('click', () => {
                     this.selected = input.checked;
                 })
+
+                if (input.checked) {
+                    this.selected = true;
+                }
             }
         })
     }

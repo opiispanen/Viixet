@@ -96,28 +96,28 @@ ul, ol {
 
 .bg-black:not(.nav),
 .bg-black.navbar > *,
-.bg-black.navtabs > .container {
+.bg-black.navtabs > .flex {
     background-color: $black;
     color: $white;
 }
 
 .bg-darkgrey:not(.nav),
 .bg-darkgrey.navbar > *,
-.bg-darkgrey.navtabs > .container {
+.bg-darkgrey.navtabs > .flex {
     background-color: $darkgrey;
     color: $white;
 }
 
 .bg-white:not(.nav),
 .bg-white.navbar > *,
-.bg-white.navtabs > .container {
+.bg-white.navtabs > .flex {
     background-color: $white;
     color: $black;
 }
 
 .bg-grey:not(.nav),
 .bg-grey.navbar > *,
-.bg-grey.navtabs > .container  {
+.bg-grey.navtabs > .flex  {
     background-color: $grey;
     color: $black;
 }
@@ -125,21 +125,21 @@ ul, ol {
 @each $color in $colorNames {
     .bg-#{$color}:not(.nav),
     .bg-#{$color}.navbar > *,
-    .bg-#{$color}.navtabs > .container  {
+    .bg-#{$color}.navtabs > .flex {
         background-color: color(#{$color});
         color: $white;
     }
 
     .bg-#{$color}-dark:not(.nav),
     .bg-#{$color}-dark.navbar > *,
-    .bg-#{$color}-dark.navtabs > .container  {
+    .bg-#{$color}-dark.navtabs > .flex  {
         background-color: color(dark#{$color});
         color: $white;
     }
 
     .bg-#{$color}-gradient:not(.nav),
     .bg-#{$color}-gradient.navbar > *,
-    .bg-#{$color}-gradient.navtabs > .container {
+    .bg-#{$color}-gradient.navtabs > .flex {
         background: linear-gradient(to bottom, color(#{$color}), color(dark#{$color}));
         background-repeat: no-repeat;
         background-size: cover;
@@ -148,7 +148,7 @@ ul, ol {
 
     .bg-#{$color}-gradient-horizontal:not(.nav),
     .bg-#{$color}-gradient-horizontal.navbar > *,
-    .bg-#{$color}-gradient-horizontal.navtabs > .container {
+    .bg-#{$color}-gradient-horizontal.navtabs > .flex {
         background: linear-gradient(to right, color(#{$color}), color(med#{$color}));
         background-repeat: no-repeat;
         background-size: cover;
@@ -157,7 +157,7 @@ ul, ol {
 
     .bg-#{$color}-gradient-horizontal__inverted:not(.nav),
     .bg-#{$color}-gradient-horizontal__inverted.navbar > *,
-    .bg-#{$color}-gradient-horizontal__inverted.navtabs > .container {
+    .bg-#{$color}-gradient-horizontal__inverted.navtabs > .flex {
         background: linear-gradient(to right, color(med#{$color}), color(#{$color}));
         background-repeat: no-repeat;
         background-size: cover;
@@ -213,6 +213,10 @@ $alignments: left center right;
     font-size: 1.4em;
 }
 
+.badge.badge-med {
+    font-size: 1em;
+}
+
 .badge.badge-thick {
     padding: 0.3em 0.6em;
 }
@@ -227,6 +231,14 @@ $alignments: left center right;
         color: $white;
         background: color(dark#{$color});
     }
+}
+
+.itemlist {
+    padding-left: 0;
+}
+
+.itemlist .itemlist__item .buttons {
+    line-height: 1em !important;
 }
 
 .clickable {
@@ -272,3 +284,12 @@ $alignments: left center right;
 
     
 }
+/*
+@for $i from 1 through 12 {
+    $name: floor(100 / $i);
+    
+    .w-#{$name} {
+      width: calc(100% / #{$i});
+    }
+  }
+  */
