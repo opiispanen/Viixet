@@ -8,13 +8,14 @@ input, textarea, button, .button, select {
 
 .form-item {
     //margin: 0;//0.3em 0.1em;
-    margin-bottom: 0.5rem;
+    margin-bottom: spacing(3);
 
     label:not(.label-inline) {
         display: block;
         position: relative;
 
         .form-item--label {
+            padding-bottom: spacing(2);
             font-weight: bold;
             display: block;
         }
@@ -23,8 +24,8 @@ input, textarea, button, .button, select {
             position: absolute;
             bottom: 0;
             right: 0;
-            padding: 0.45em 0.5em;
-            font-size: 1.2em;
+            padding: spacing(2);
+            font-size: 1.22em;
             min-width: 2.5em;
             box-shadow: none;
         }
@@ -38,7 +39,7 @@ input, textarea, button, .button, select {
     textarea,
     select {
         width: 100%;
-        padding: 0.4em 0.5em;
+        padding: spacing(2);
         font-size: 1.2em;
 
         @if setting(input_enableBorders) == 1 {
@@ -60,7 +61,7 @@ input, textarea, button, .button, select {
 
     input[type="radio"],
     input[type="checkbox"] {
-        margin-right: 0.5em;
+        margin-right: spacing(2);
         transform: scale(1.25);
     }
 }
@@ -68,7 +69,7 @@ input, textarea, button, .button, select {
 .form-item.input-group {
     input:not([type="radio"]),
     input:not([type="checkbox"]) {
-        padding-right: 2.5em;
+        padding-right: spacing(6);
     }
 }
 
@@ -85,9 +86,9 @@ input, textarea, button, .button, select {
     button,
     .button {
         border-radius: 0;
-        margin-left: -0.25rem;
+        margin-left: -1 * spacing(1);
         margin-right: 0;
-        padding: 0.7rem 0.9rem;
+        padding: spacing(3) spacing(4);
         box-shadow: none;
     }
 
@@ -137,7 +138,7 @@ button,
     */
     background: $grey;
     font-size: 1.2em;
-    padding: 0.5rem 0.7rem;
+    padding: spacing(2) spacing(3);
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     user-select: none;
     margin: 0;//0.3em 0.1em;
@@ -187,11 +188,11 @@ button:disabled,
 }
 
 .button.button-tight {
-    padding: 0.3em 0.6em;
+    padding: spacing(1) spacing(2);
 }
 
 .button.button-thick {
-    padding: 0.9em;
+    padding: spacing(4);
 }
 
 .button.loading:before {
@@ -221,7 +222,7 @@ button:disabled,
     display: inline-block;
     text-align: center;
     opacity: 0.6;
-    margin: 2em;
+    margin: spacing(6);
 }
 
 .loading-spinner:before {
@@ -310,7 +311,7 @@ button:disabled,
 
 .switch {
     position: relative;
-    padding-left: 55px;
+    padding-left: spacing(7);
     user-select: none;
 
     input[type="checkbox"] {

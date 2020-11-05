@@ -4,7 +4,7 @@
         'switch': switcher,
         'selected': selected
     }">
-        <span class="form-item--label" v-if="!label || !switcher">{{ label }}</span>
+        <span class="form-item--label" v-if="enableLabel">{{ label }}</span>
         <slot></slot>
         <span v-if="switcher">{{ label }}</span>
     </label>
@@ -27,6 +27,19 @@ export default {
     data: () => ({
         selected: false
     }),
+    computed: {
+        enableLabel() {
+            if (!!this.switcher) {
+                return false;
+            }
+
+            if (!this.label || (!!this.label && this.label.length === 0)) {
+                return false;
+            }
+
+            return true;
+        }
+    },
     mounted() {
         if (!this.switcher)
             return;

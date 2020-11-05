@@ -28,53 +28,53 @@ h1,h2,h3,h4,h5,h6 {
     sub {
         display: block;
         font-size: 0.45em;
-        margin: 0.3em 0;
+        margin: spacing(1) 0;
     }
 }
 
 h1 {
-    font-size: 1.5rem;
-    margin: 0.8rem 0;
+    font-size: 1.5em;
+    margin: spacing(3) 0;
 }
 
 h2 {
-    font-size: 1.35rem;
-    margin: 0.7rem 0;
+    font-size: 1.35em;
+    margin: spacing(3) 0;
 }
 
 h3 {
-    font-size: 1.25rem;
-    margin: 0.65rem 0;
+    font-size: 1.25em;
+    margin: spacing(2) 0;
 }
 
 h4 {
-    font-size: 1.1rem;
-    margin: 0.6rem 0;
+    font-size: 1.1em;
+    margin: spacing(2) 0;
 }
 
 h5 {
-    font-size: 1rem;
-    margin: 0.55rem 0;
+    font-size: 1em;
+    margin: spacing(2) 0;
 }
 
 h6 {
-    font-size: 0.75rem;
-    margin: 0.35rem 0;
+    font-size: 0.75em;
+    margin: spacing(1) 0;
 }
 
 p {
-    margin: 0.5rem 0;
+    margin: spacing(2) 0;
 }
 
 hr {
-    margin: 1.5em 0;
+    margin: spacing(4) 0;
     border: 0;
     height: 1px;
     background-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(51, 51, 51, 0.2) 10%, rgba(51, 51, 51, 0.2) 90%, rgba(0, 0, 0, 0) 100%);
 }
 
 ul, ol {
-    padding-left: 1.2em;
+    padding-left: spacing(4);
 }
 
 .page {
@@ -199,8 +199,8 @@ $alignments: left center right;
     color: $white;
     background: $darkgrey;    
     padding: 0.5em 0.8em;
-    margin-right: 0.4em;
-    margin-bottom: 0.4em;
+    margin-right: spacing(2);
+    margin-bottom: spacing(2);
     border-radius: setting('badge_borderRadius');
     display: inline-block;
     font-size: 0.8em;
@@ -254,8 +254,8 @@ $alignments: left center right;
 }
 
 .container {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    padding-left: spacing(2);
+    padding-right: spacing(2);
 }
 
 @media only screen and (max-width: 48em) {

@@ -17,7 +17,7 @@
     }
 
     .title {
-        padding: 0.6em 0;
+        padding: spacing(2) 0;
     }
 
     .row {
@@ -36,7 +36,7 @@
     }
 
     .form-item {
-        margin: 0.2rem 0;
+        margin: spacing(1) 0;
     }
     
     [class*="col-xs"] {
@@ -47,7 +47,7 @@
 body.has-navbar {
     
     .page.main-view {
-        padding-top: calc(#{$navbarHeight} + 0.75em);    
+        padding-top: calc(#{$navbarHeight} + spacing(3));    
     }
 }
 

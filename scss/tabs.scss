@@ -1,7 +1,7 @@
 .tabs-master {
     .tabs {
         list-style: none;
-        margin: 0.5em 0;
+        margin: spacing(2) 0;
     
         .indicator-parent {
             height: 3px;
@@ -22,7 +22,7 @@
         }
     
         .tab {
-            padding: 0.5em 0em;
+            padding: spacing(2) 0em;
             text-align: center;
             user-select: none;
             cursor: pointer;

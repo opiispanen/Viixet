@@ -2,21 +2,17 @@
     position: relative;
     border-radius: setting('common_borderRadius');
     max-width: 98vw;
-    /*
-    box-shadow: 0 0.3em 1em 0.2em rgba(51,51,51,.1);
-    margin: 2rem 2vw;
-    */
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     
 }
 
 .card {
-    padding: 1em 1em;
+    padding: spacing(4);
     background-size: 178%;
 
     .card__header {
         position: relative;
-        margin-bottom: 1.5em;
+        margin-bottom: spacing(4);
     }
 
     .card__date {
@@ -40,8 +36,8 @@
 
     .profile {
         position: relative;
-        height: 42px;
-        padding-left: 42px;
+        height: spacing(7);
+        padding-left: spacing(7);
 
         .avatar {
             position: absolute;
