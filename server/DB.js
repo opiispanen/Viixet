@@ -61,7 +61,7 @@ class DB {
     }
 
     mapDates(obj) {
-        const dateToTimestamp = (date) => (new Date(date)).getTime();
+        const dateToTimestamp = (date) => (new Date(date)).toISOString();
         
         dateFields.forEach(name => {
             if (!!obj[name]) {

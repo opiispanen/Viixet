@@ -99,6 +99,14 @@ const routes = {
                 send(res, { success: false }, 401)
             }
         }
+    },
+    '/ping': {
+        get: (req, res) => {
+            send(res, {
+                success: true,
+                timestamp: (new Date()).toISOString()
+            })
+        }
     }
 }
 
@@ -222,6 +230,10 @@ function authenticate(token, req, res) {
         loginRequired: true
     }
 
+    if (token === false) {
+        return Promise.reject({...rejectMessage, level:0})
+    }
+
     return db.q(
         `SELECT 
             token, viixetId, valid 
@@ -248,6 +260,38 @@ function authenticate(token, req, res) {
                     updateTokenTime(row['token'], row['viixetId']);
                     return user;
                 })
+                .catch((error) => Promise.reject({...rejectMessage, level:1}))
+        } else {
+            return Promise.reject({...rejectMessage, level:2})
+        }
+    })
+    .catch((error) => Promise.reject(error))
+}
+
+function getUserByToken(token) {
+    const now = Date.now();
+    const rejectMessage = {
+        success: false,
+        error: 'Token expired',
+        loginRequired: true
+    }
+
+    return db.q(
+        `SELECT 
+            token, viixetId, valid 
+        FROM ${ authScheme }authtoken 
+        WHERE token = ?`, 
+        [ token ]
+    )
+    .then((result, fields) => {
+        if (!result[0]) {
+            return Promise.reject({...rejectMessage, level:3})
+        }
+
+        const row = result[0]
+
+        if (now - (new Date(row['valid'])).getTime() < threshold) {
+            return getUser(row['viixetId'])
                 .catch((error) => Promise.reject({...rejectMessage, level:1}))
         } else {
             return Promise.reject({...rejectMessage, level:2})
@@ -317,5 +361,6 @@ function pushUserGroup(user) {
 
 module.exports = {
     routes,
-    authenticate
+    authenticate,
+    getUserByToken
 }
