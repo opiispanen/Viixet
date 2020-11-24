@@ -18,7 +18,7 @@ function initRoutes(app) {
                 const publicRoute = !route.authenticate || !route.authenticate[method];
 
                 app[method](name, async (req, res) => {
-                    const token = req.cookies[tokenName] || false;
+                    const token = req.cookies[tokenName];
                     
                     try {
                         const user = await Viixet.authenticate(token, req, res)

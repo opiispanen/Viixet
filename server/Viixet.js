@@ -230,7 +230,7 @@ function authenticate(token, req, res) {
         loginRequired: true
     }
 
-    if (token === false) {
+    if (typeof token !== 'string') {
         return Promise.reject({...rejectMessage, level:0})
     }
 
