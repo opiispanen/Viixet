@@ -36,15 +36,15 @@
 </template>
 
 <script>
-import login from '../Login.vue'
-import registration from '../Registration.vue'
-import tabs from './Tabs.vue'
+import Login from './Login.vue'
+import Registration from './Registration.vue'
+import Tabs from '../components/Tabs.vue'
 
 export default {
     components: {
-        login,
-        registration,
-        tabs
+        Login,
+        Registration,
+        Tabs
     },
     data: () => ({
     }),

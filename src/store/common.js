@@ -6,10 +6,7 @@ export default {
         lang: localStorage['ViixetLang'] || settings.defaultLang,
         languages,
         showModal: false,
-        sideDrawerOpened: false,
         activePortal: '',
-        activeMenuRightPortal: '',
-        activeMenuLeftPortal: '',
         isMobileSize: false
     },
     getters: {
@@ -44,12 +41,6 @@ export default {
         },
         setActivePortal(state, value) {
             state.activePortal = value;
-        },
-        setActiveMenuRightPortal(state, value) {
-            state.activeMenuRightPortal = value;
-        },
-        setActiveMenuLeftPortal(state, value) {
-            state.activeMenuLeftPortal = value;
         },
         setIsMobile(state, value) {
             state.isMobileSize = value;

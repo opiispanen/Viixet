@@ -29,47 +29,19 @@
 
 <script>
 import Page from '../components/Page.vue'
-import login from '../Viixet/Login.vue'
-import registration from '../Viixet/Registration.vue'
-import tabs from '../Viixet/components/Tabs.vue'
+import Tabs from '../Viixet/components/Tabs.vue'
 import axios from 'axios'
 
 export default {
     components: {
         Page,
-        login,
-        registration,
-        tabs
+        Tabs
     },
     methods: {
-        getArticlesStrapi(data) {
-            return axios.get('http://localhost:1337/blog-posts', {
-                headers: {
-                    //withCredentials: true,
-                    Authorization: 'Bearer '+data.jwt
-                }
-            })
-            .then(({ data }) => {
-                console.log(data);
-            })
-            .catch(e => console.error(e))
-        },
-        loginStrapi() {
-            return axios.post('http://localhost:1337/auth/local', {
-                identifier: 'test',
-                password: '-Test123',
-            })
-            .then(({ data }) => {
-                console.log(data);
-                //axios.defaults.headers.common['withCredentials'] = true;
-                return { data }
-            })
-            .catch(e => console.error(e))
-        }
+        
     },
     mounted() {
         this.$store.commit('user/setCallbackState', '/dashboard')        
-        this.loginStrapi().then(({ data }) => this.getArticlesStrapi(data));
     }
 }
 </script>
