@@ -1,7 +1,7 @@
 <template>
 <li class="itemlist__item" 
 	:class="{ 
-		'has-image': !!image,
+		'has-image': !!image || checkSlot('image'),
 		'selected': stateSelected
 	}">
 	<div class="image"
@@ -74,7 +74,7 @@ export default {
 	mounted() {
 		this.stateSelected = !!this.selected;
 
-		const content = this.$el.querySelector(".content");
+		const content = this.$el;
 
 		if (this.checkSlot("buttons")) {
 			let buttons = this.$el.querySelector(".buttons"),
@@ -96,25 +96,43 @@ export default {
         display: block;
         min-height: 3.5em;
         position: relative;
-        border-bottom: 1px solid #c4c4c4;
-        padding-left: 0.3em;
+		border-bottom: 1px solid #c4c4c4;
+		padding: 0.75em;
 
         .content {
-            font-size: .85em;
-            padding: 1.25em 0;
+			font-size: .85em;
+			
+			h1, h2, h3, h4, h5, h6, p {
+				margin: 0 0 .5em 0;
+			}
         }
 
-        .image {
+        .image, .image-element {
+            position:absolute;
             width: 2.5em;
             height: 2.5em;
-            position:absolute;
-            top: 0.5em;
-            left: 0.25em;
+            top: .75em;
+			left: .75em;
+		}
+		
+		.image-element {
+			i.fa {
+				display: block;
+				border-radius: 100%;
+				height: 100%;
+				background: #333;
+				color: #fff;
+				text-align: center;
+				line-height: 2.5em;
+			}
+		}
+
+		.image {
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center; 
             border-radius: 100%;
-        }
+		}
 
         .buttons {
             position: absolute;
@@ -160,9 +178,7 @@ export default {
     }
 
     .itemlist__item.has-image {
-        .content {
-            padding-left: 4em;
-        }
+        padding-left: 4em;
     }
 }
 </style>

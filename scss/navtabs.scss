@@ -23,6 +23,11 @@ body.has-navtabs {
     }
 }
 
+.navtabs.bg-black .dropdown__base {
+    background: $black;
+    color: $white;
+}
+
 .navtabs {
     position: fixed;
     width: 100%;
@@ -69,6 +74,10 @@ body.has-navtabs {
             font-size: 0.6em;
             word-break: break-word;
         }
+    }
+
+    .dropdown__base a {
+        padding: 0;
     }
 
     a.router-link-exact-active {
