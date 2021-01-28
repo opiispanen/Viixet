@@ -1,8 +1,15 @@
 const send = require('./send.js')
 const db = require('./dbInstance.js')
+const mailer = require('./mailer')
+const translator = require('./translator')
 const authScheme = process.env.DB_AUTH_SCHEME
+const salt = process.env.DB_SALT
 const tokenName = process.env.AUTH_TOKENNAME
 const threshold = 604800000; // 1 week // 45 * 60 * 1000; // 45 minutes
+const TOKEN_TYPES = {
+    login: 0,
+    passwordRequest: 1
+}
 
 const routes = {
     '/login': {
@@ -40,7 +47,7 @@ const routes = {
             }
 
             if (user !== false) {
-                clearToken(user.viixetId)
+                clearToken(user.viixetId, req.cookies[tokenName])
                     .then(() => {
                         data.success = true;
                         res.clearCookie(tokenName);
@@ -86,6 +93,12 @@ const routes = {
                 ))
         }
     },
+    '/resetpassword/:token': {
+        post: resetPasswordEndpoint
+    },
+    '/resetpassword': {
+        post: requestResetPasswordEndpoint
+    },
     '/authenticate': {
         get: (req, res, user) => {
             if (user !== false) {
@@ -110,6 +123,57 @@ const routes = {
     }
 }
 
+async function resetPasswordEndpoint(req, res) {
+    const body = req.body
+    const params = req.params
+    const data = { success: false }
+
+    try {
+        const user = await validateToken(params.token, TOKEN_TYPES.passwordRequest)
+        const clearResult = await clearToken(user.viixetId, params.token)
+        const result = await changePassword(user.viixetId, body.password)
+
+        data.success = true;
+        send(res, data)
+    } catch(error) {
+        send(res, { ...data, error })
+    }
+}
+
+async function requestResetPasswordEndpoint(req, res)  {
+    const body = req.body
+    const data = { success: false }
+    
+    try {
+        const viixetId = await userAvailable(body.username, body.email, true);
+        
+        if (viixetId !== null) {
+            try {
+                const result = await requestResetPassword(viixetId, body.email, body.lang);
+                
+                data.success = true;
+                data.result = result;
+                send(res, data)
+            } catch(error) {
+                send(
+                    res, 
+                    { error, success: false, level: 2 }
+                )
+            }
+        } else {
+            send(
+                res, 
+                { error: 'FAILED', success: false, level: 1 }
+            )
+        }
+    } catch(error) {
+        send(
+            res, 
+            { error: 'FAILED', success: false, level: 0 }
+        )
+    }
+}
+
 function getUser(viixetId) {
     return db.q(
         `SELECT viixetId, username, email FROM ${ authScheme }user WHERE viixetId = ?`, 
@@ -125,13 +189,95 @@ function getUser(viixetId) {
     })
 }
 
-function userAvailable(username, email) {
+function userAvailable(username, email, returnUserId = false) {
     return db.q(
         `SELECT viixetId FROM ${ authScheme }user WHERE username = ? OR email = ?`, 
         [ username, email ]
     ).then((result, fields) => {
+        if (returnUserId) {
+            if (!!result && !!result.length) {
+                return result[0].viixetId;
+            } else return null;
+        }
         return !result || !result.length
     })
+}
+
+function changePassword(viixetId, password) {
+    const hash = db.hash(password)
+
+    return db.q(
+        `UPDATE ${ authScheme }user SET password = ? WHERE viixetId = ?`,
+        [ hash, viixetId ]
+    ).then((result) => {
+        if (!result.affectedRows) {
+            return Promise.reject('PASSWORD_UPDATE_FAILED')
+        }
+
+        return result.affectedRows;
+    })
+}
+
+function validateToken(token, type = 0) {
+    const now = Date.now();
+    let tokenTTL = threshold;
+
+    if (TOKEN_TYPES.passwordRequest) {
+        tokenTTL = 45 * 60 * 1000;
+    }
+
+    return db.q(
+        `SELECT 
+            token, viixetId, valid 
+        FROM ${ authScheme }authtoken 
+        WHERE token = ? AND \`type\` = ?`, 
+        [ token, type ]
+    )
+    .then((result, fields) => {
+        if (!result[0]) {
+            return Promise.reject('ERROR_TOKEN_INVALID')
+        }
+
+        const row = result[0]
+
+        if (now - (new Date(row['valid'])).getTime() < tokenTTL) {
+            return {
+                viixetId: row.viixetId
+            }
+        }
+
+        return Promise.reject('ERROR_TOKEN_EXPIRED')
+    })
+}
+
+async function requestResetPassword(viixetId, email, lang) {
+    const t = translator.translate;
+    try {
+        const result = await createToken(viixetId, TOKEN_TYPES.passwordRequest);
+
+        if (!result.token) {
+            return Promise.reject('ERROR_NO_TOKEN');
+        }
+
+        const link = `${ process.env.BASE_URL }/#/resetpassword/${ result.token }`;
+        try {
+            return Promise.resolve();
+            /*
+            const mailResult = await mailer.sendMail(
+                email,
+                t(lang, 'FORGOTPASSWORD_SUBJECT'),
+                `${ t(lang, 'FORGOTPASSWORD_TEXT') } ${ link }`,
+                `${ t(lang, 'FORGOTPASSWORD_TEXT') } <a href="${ link }">${ link }</a>`
+            );
+    
+            return Promise.resolve(mailResult);
+            */
+        } catch(error) {
+            return Promise.reject(error);
+        }
+    } catch(error) {
+        return Promise.reject(error);
+    }
 }
 
 function registration(username, password, email) {
@@ -179,10 +325,10 @@ function registration(username, password, email) {
         ]
     ).then((result, fields) => {
         if (!result || !result.insertId)
-            return Promise.reject(rejectMessage)
+            return Promise.reject({ ...rejectMessage, phase: 2 })
         else
             return result.insertId
-    }).catch(() => Promise.reject(rejectMessage))
+    }).catch((err) => Promise.reject({ ...rejectMessage, phase: 1, err }))
 }
 
 function login(username, password) {
@@ -268,47 +414,18 @@ function authenticate(token, req, res) {
     .catch((error) => Promise.reject(error))
 }
 
-function getUserByToken(token) {
-    const now = Date.now();
-    const rejectMessage = {
-        success: false,
-        error: 'Token expired',
-        loginRequired: true
-    }
-
-    return db.q(
-        `SELECT 
-            token, viixetId, valid 
-        FROM ${ authScheme }authtoken 
-        WHERE token = ?`, 
-        [ token ]
+function createToken(viixetId, type = 0) {
+    const token = db.hash(
+        viixetId 
+        + salt 
+        + (new Date).toISOString()
     )
-    .then((result, fields) => {
-        if (!result[0]) {
-            return Promise.reject({...rejectMessage, level:3})
-        }
-
-        const row = result[0]
-
-        if (now - (new Date(row['valid'])).getTime() < threshold) {
-            return getUser(row['viixetId'])
-                .catch((error) => Promise.reject({...rejectMessage, level:1}))
-        } else {
-            return Promise.reject({...rejectMessage, level:2})
-        }
-    })
-    .catch((error) => Promise.reject(error))
-}
-
-function createToken(viixetId) {
-    const now = (new Date).getTime()
-    const token = db.hash(((now / 2) + viixetId + now).toString())
-
+    
     return db.q(
         `INSERT INTO 
-            ${ authScheme }authtoken (token, viixetId) 
-        VALUES (?, ?)`, 
-        [ token, viixetId ]
+            ${ authScheme }authtoken (token, viixetId, \`type\`) 
+        VALUES (?, ?, ?)`, 
+        [ token, viixetId, type ]
     ).then((result, fields) => {
         return {
             token
@@ -357,6 +474,38 @@ function pushUserGroup(user) {
                 }
             )
         })
+}
+
+function getUserByToken(token) {
+    const now = Date.now();
+    const rejectMessage = {
+        success: false,
+        error: 'Token expired',
+        loginRequired: true
+    }
+
+    return db.q(
+        `SELECT 
+            token, viixetId, valid 
+        FROM ${ authScheme }authtoken 
+        WHERE token = ?`, 
+        [ token ]
+    )
+    .then((result, fields) => {
+        if (!result[0]) {
+            return Promise.reject({...rejectMessage, level:3})
+        }
+
+        const row = result[0]
+
+        if (now - (new Date(row['valid'])).getTime() < threshold) {
+            return getUser(row['viixetId'])
+                .catch((error) => Promise.reject({...rejectMessage, level:1}))
+        } else {
+            return Promise.reject({...rejectMessage, level:2})
+        }
+    })
+    .catch((error) => Promise.reject(error))
 }
 
 module.exports = {

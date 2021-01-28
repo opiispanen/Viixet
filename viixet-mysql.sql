@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS `viixet`.`authtoken` (
   `token` VARCHAR(255) NOT NULL,
   `viixetId` INT UNSIGNED NOT NULL,
   `valid` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `type` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`token`),
   INDEX `fk_AuthToken_User_idx` (`viixetId` ASC),
   CONSTRAINT `fk_AuthToken_User`

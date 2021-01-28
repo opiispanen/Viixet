@@ -6,6 +6,7 @@ import store from './store.js'
 const Viixet = () => import('./views/Viixet.vue')
 const Splash = () => import('./views/Splash.vue')
 const PageNotFound = () => import('./views/PageNotFound.vue')
+const ForgotPassword = () => import('./views/ForgotPassword.vue')
 
 Vue.use(VueRouter)
 
@@ -27,6 +28,11 @@ const routes = [
         path: '/',
         name: 'Splash',
         component: Splash
+    },
+    {
+        path: '/resetpassword/:token',
+        name: 'ForgotPassword',
+        component: ForgotPassword
     },
     {
         path: '*', 
