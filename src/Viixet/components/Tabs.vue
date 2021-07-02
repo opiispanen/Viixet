@@ -52,6 +52,7 @@ export default {
             this.toggle(true, index);
 
             this.active = index;
+            this.$emit('change', index)
         },
         toggle(show, index) {
             const content = Array.prototype.slice.call(this.$refs.content.children);

@@ -1,10 +1,8 @@
 const send = require('./send.js')
 const db = require('./dbInstance.js')
-const mailer = require('./mailer')
-const translator = require('./translator')
-const authScheme = process.env.DB_AUTH_SCHEME
-const salt = process.env.DB_SALT
-const tokenName = process.env.AUTH_TOKENNAME
+const authScheme = process.env.DB_AUTH_SCHEME;
+const salt = process.env.DB_SALT || '';
+const tokenName = process.env.AUTH_TOKENNAME;
 const threshold = 604800000; // 1 week // 45 * 60 * 1000; // 45 minutes
 const TOKEN_TYPES = {
     login: 0,
@@ -47,7 +45,7 @@ const routes = {
             }
 
             if (user !== false) {
-                clearToken(user.viixetId, req.cookies[tokenName])
+                clearToken(user.viixetId)
                     .then(() => {
                         data.success = true;
                         res.clearCookie(tokenName);
@@ -112,14 +110,6 @@ const routes = {
                 send(res, { success: false }, 401)
             }
         }
-    },
-    '/ping': {
-        get: (req, res) => {
-            send(res, {
-                success: true,
-                timestamp: (new Date()).toISOString()
-            })
-        }
     }
 }
 
@@ -139,6 +129,7 @@ async function resetPasswordEndpoint(req, res) {
         send(res, { ...data, error })
     }
 }
+
 
 async function requestResetPasswordEndpoint(req, res)  {
     const body = req.body
@@ -178,27 +169,46 @@ function getUser(viixetId) {
     return db.q(
         `SELECT viixetId, username, email FROM ${ authScheme }user WHERE viixetId = ?`, 
         [ viixetId ]
-    ).then((result, fields) => {
+    ).then(async (result, fields) => {
         if (!result || !result.length)
             return Promise.reject({
                 success: false,
                 error: 'User not found'
             })
-        else
-            return result[0]
+        else {
+            const user =  result[0];
+
+            try {
+                const groups = await getUserGroups(viixetId)
+                user.groups = groups;
+            } catch(e) {
+                user.groupError = e;
+                user.groups = [];
+            }
+            
+            return user;
+        }
     })
 }
 
-function userAvailable(username, email, returnUserId = false) {
+function getUserGroups(viixetId) {
+    return db.q(
+        `SELECT t3.groupId, t3.name, t3.created, t3.type 
+        FROM ${ authScheme }user t1
+        INNER JOIN ${ authScheme }group_user t2 ON t2.viixetId = t1.viixetId
+        INNER JOIN ${ authScheme }\`group\` t3 ON t3.groupId = t2.groupId
+        WHERE t1.viixetId = ?`, 
+        [ viixetId ]
+    ).then((result, fields) => {
+        return !!result && !!result.length ? result.map(db.mapDates) : []
+    })
+}
+
+function userAvailable(username, email) {
     return db.q(
         `SELECT viixetId FROM ${ authScheme }user WHERE username = ? OR email = ?`, 
         [ username, email ]
     ).then((result, fields) => {
-        if (returnUserId) {
-            if (!!result && !!result.length) {
-                return result[0].viixetId;
-            } else return null;
-        }
         return !result || !result.length
     })
 }
@@ -261,8 +271,8 @@ async function requestResetPassword(viixetId, email, lang) {
 
         const link = `${ process.env.BASE_URL }/#/resetpassword/${ result.token }`;
         try {
-            return Promise.resolve();
-            /*
+            //return Promise.resolve();
+            
             const mailResult = await mailer.sendMail(
                 email,
                 t(lang, 'FORGOTPASSWORD_SUBJECT'),
@@ -271,7 +281,6 @@ async function requestResetPassword(viixetId, email, lang) {
             );
     
             return Promise.resolve(mailResult);
-            */
         } catch(error) {
             return Promise.reject(error);
         }
@@ -325,10 +334,10 @@ function registration(username, password, email) {
         ]
     ).then((result, fields) => {
         if (!result || !result.insertId)
-            return Promise.reject({ ...rejectMessage, phase: 2 })
+            return Promise.reject(rejectMessage)
         else
             return result.insertId
-    }).catch((err) => Promise.reject({ ...rejectMessage, phase: 1, err }))
+    }).catch(() => Promise.reject(rejectMessage))
 }
 
 function login(username, password) {
@@ -343,28 +352,41 @@ function login(username, password) {
         FROM ${ authScheme }user 
         WHERE username = ? AND password = ?`, 
         [
-            username, 
+            username,
             db.hash(password)
         ]
     ).then((result, fields) => {
         if (!result || !result.length) {
-            return Promise.reject(rejectMessage)
+            return Promise.reject({
+                ...rejectMessage,
+                level: 1
+            })
         }
         
         const row = result[0]
         
         return createToken(row['viixetId'])
-            .then((auth) => {
-                return {
-                    user: {
+            .then(async (auth) => {
+                let user = false;
+                try {
+                    user = await getUser(row['viixetId'])
+                } catch(e) {
+                    user = {
                         username: row['username'],
                         email: row['email']
-                    },
+                    }
+                }
+                return {
+                    user,
                     auth
                 }
             })
-    }).catch(() => {
-        return Promise.reject(rejectMessage)
+    }).catch((error) => {
+        return Promise.reject({
+            ...rejectMessage,
+            level: 2,
+            error
+        })
     })
 }
 
@@ -375,7 +397,7 @@ function authenticate(token, req, res) {
         error: 'Token expired',
         loginRequired: true
     }
-
+    
     if (typeof token !== 'string') {
         return Promise.reject({...rejectMessage, level:0})
     }
@@ -420,7 +442,7 @@ function createToken(viixetId, type = 0) {
         + salt 
         + (new Date).toISOString()
     )
-    
+
     return db.q(
         `INSERT INTO 
             ${ authScheme }authtoken (token, viixetId, \`type\`) 
@@ -476,40 +498,7 @@ function pushUserGroup(user) {
         })
 }
 
-function getUserByToken(token) {
-    const now = Date.now();
-    const rejectMessage = {
-        success: false,
-        error: 'Token expired',
-        loginRequired: true
-    }
-
-    return db.q(
-        `SELECT 
-            token, viixetId, valid 
-        FROM ${ authScheme }authtoken 
-        WHERE token = ?`, 
-        [ token ]
-    )
-    .then((result, fields) => {
-        if (!result[0]) {
-            return Promise.reject({...rejectMessage, level:3})
-        }
-
-        const row = result[0]
-
-        if (now - (new Date(row['valid'])).getTime() < threshold) {
-            return getUser(row['viixetId'])
-                .catch((error) => Promise.reject({...rejectMessage, level:1}))
-        } else {
-            return Promise.reject({...rejectMessage, level:2})
-        }
-    })
-    .catch((error) => Promise.reject(error))
-}
-
 module.exports = {
     routes,
-    authenticate,
-    getUserByToken
+    authenticate
 }

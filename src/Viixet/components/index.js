@@ -1,5 +1,4 @@
 import BasicModal from './BasicModal.vue'
-import UserModal from './UserModal.vue'
 import Card from './Card.vue'
 import DropDown from './DropDown.vue'
 import ListItem from './ListItem.vue'
@@ -10,7 +9,6 @@ import FormInput from './FormInput.vue'
 
 const components = {
     BasicModal,
-    UserModal,
     Card,
     DropDown,
     ListItem,

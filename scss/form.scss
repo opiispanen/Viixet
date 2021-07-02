@@ -284,6 +284,11 @@ button:disabled,
         border: 1px solid color(#{$color});
         */
     }
+    .button.button-#{$color}.button-outline {
+        color: color(#{$color});
+        background: $white;
+        border: 1px solid color(#{$color});
+    }
     /*
     .button.button-#{$color}.button-bare:hover {
         border: 1px solid transparent;
@@ -299,6 +304,11 @@ button:disabled,
         background: none;
         border: 1px solid transparent;
     }
+    .button.button-#{$color}-dark.button-outline {
+        color: color(dark#{$color});
+        background: $white;
+        border: 1px solid color(dark#{$color});
+    }
     /*
     .button.button-#{$color}-dark.button-bare:hover {
         border: 1px solid transparent;
@@ -312,7 +322,7 @@ button:disabled,
 
 .switch {
     position: relative;
-    padding-left: spacing(7);
+    padding-left: spacing(8);
     user-select: none;
 
     input[type="checkbox"] {
@@ -330,9 +340,9 @@ button:disabled,
 .switch:after {
     transition: transform 0.15s ease-out;
     left: 0px;
-    top: -3px;
-    width: 23px;
-    height: 23px;
+    top: -.25em;
+    width: 1.5em;
+    height: 1.5em;
     background: #f0f0f0;
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
@@ -347,8 +357,8 @@ button:disabled,
     transition: background 0.15s ease-out;
     left: 4px;
     top: 0px;
-    width: 40px;
-    height: 18px;
+    width: 2.5em;
+    height: 1em;
     background: #a0a0a0;
     border-radius: 4px;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.12), inset 0 1px 2px rgba(0,0,0,0.24);

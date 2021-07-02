@@ -67,7 +67,9 @@ $gutter: spacing(2);
     }
 
     .modal__base.wide {
-        width: 75%;
-        left: 12.5%;
+        width: 90%;
+        left: 5%;
+        top: .5em;
+        min-height: calc(100% - 1em);
     }
 }

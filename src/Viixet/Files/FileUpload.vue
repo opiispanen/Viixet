@@ -3,14 +3,14 @@
     <div v-if="enabled">
         <p>{{ usedSpace }}/{{ quota }} MB</p>
         <label>File
-            <input type="file" id="files" ref="files" multiple :accept="accept.join(',')" />
+            <input type="file" @change="submitFiles" ref="files" multiple :accept="accept.join(',')" />
         </label>
-        <button v-on:click="submitFiles()">{{ $translate($store.state.lang, 'SUBMIT') }}</button>
+        <button v-if="false" v-on:click="submitFiles()">{{ $translate('SUBMIT') }}</button>
     </div>
     <div v-else>
-        <p v-if="requested"><span class="badge badge-big">{{ $translate($store.state.lang, 'FILE_PENDING_PRIVILEGES') }}</span></p>
+        <p v-if="requested"><span class="badge badge-big">{{ $translate('FILE_PENDING_PRIVILEGES') }}</span></p>
         <p v-else>
-            <button class="button button-thick" @click="$store.dispatch('files/requestPrivileges')">{{ $translate($store.state.lang, 'FILE_REQUEST_PRIVILEGES') }}</button>
+            <button class="button button-thick" @click="$store.dispatch('files/requestPrivileges')">{{ $translate('FILE_REQUEST_PRIVILEGES') }}</button>
         </p>
     </div>
 </div>
@@ -37,16 +37,18 @@ export default {
                 .then((data) => this.$emit('onLoad', data))
                 .catch((error) => {
                     this.viixetAlert({
-                        message: this.$translate(this.$store.state.lang, 'FILES_UPLOAD_FAILED'),
-                        subMessage: this.$translate(this.$store.state.lang, error.response.data.error),
+                        message: this.$translate('FILES_UPLOAD_FAILED'),
+                        subMessage: this.$translate(error),
                         buttons: [
                             {
-                                text: this.$translate(this.$store.state.lang, 'CONFIRM'),
+                                text: this.$translate('CONFIRM'),
                                 type: 'bare',
                                 callback: 'cancel'
                             }
                         ]
                     })
+                }).finally(() => {
+                    this.$refs.files.value = '';
                 })
         }
     }

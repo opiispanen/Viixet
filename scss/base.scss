@@ -284,12 +284,6 @@ $alignments: left center right;
 
     
 }
-/*
-@for $i from 1 through 12 {
-    $name: floor(100 / $i);
-    
-    .w-#{$name} {
-      width: calc(100% / #{$i});
-    }
-  }
-  */
+
+
+  

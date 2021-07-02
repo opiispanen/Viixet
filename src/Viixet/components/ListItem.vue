@@ -116,6 +116,9 @@ export default {
 		}
 		
 		.image-element {
+			img {
+				width: 100%;
+			}
 			i.fa {
 				display: block;
 				border-radius: 100%;
@@ -139,6 +142,8 @@ export default {
             top: 0.5em;
             right: 0.3em;
             line-height: 2.25em;
+			display: flex;
+			flex-direction: column;
         }
 
 		.selection {

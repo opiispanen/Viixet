@@ -70,6 +70,7 @@ export default {
                             authenticated: true
                         }
                         context.state.afterLogin.forEach(callback => callback());
+                        context.commit('groups/setGroups', data.user.groups, { root: true })
 
                         return response;
                     } else {
@@ -91,6 +92,7 @@ export default {
                         context.dispatch('userLoggedIn');
                         context.dispatch('save');
                         context.state.afterLogin.forEach(callback => callback())
+                        context.commit('groups/setGroups', data.user.groups, { root: true })
 
                         resolve({
                             success: true
@@ -111,6 +113,16 @@ export default {
         },
         registration(context, user) {
             return axios.post(context.state.baseUrl + 'registration', user)
+        },
+        resetPassword({ rootGetters }, { username, email, lang }) {
+            if (!rootGetters['sendEmailEnabled']) {
+                return Promise.reject();
+            }
+            return axios.post('/resetpassword', {
+                username,
+                email,
+                lang,
+            })
         },
         save(context) {
             const userData = {

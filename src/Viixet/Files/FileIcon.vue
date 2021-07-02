@@ -8,10 +8,16 @@
     <div class="file-icon" v-if="file.mimetype.indexOf('image') > -1 && false">
         <i class="fa fa-file-image"></i>
     </div>
-    <div class="file-icon" v-if="file.mimetype.indexOf('image') < 0">
+    <div class="file-icon" v-if="file.mimetype.indexOf('image') < 0 && file.mimetype.indexOf('link') < 0">
         <i class="fa fa-file"></i>
     </div>
-    <div class="file-name">{{ file.name }} ({{ size }} MB)</div>
+    <div class="file-icon" v-if="file.mimetype.indexOf('link') > -1">
+        <i class="fa fa-link"></i>
+    </div>
+    <div class="file-name">
+        <span>{{ fileName }}</span>
+        <span v-if="showSize">({{ size }} MB)</span>
+    </div>
 </div>
 </template>
 
@@ -26,6 +32,27 @@ export default {
     computed: {
         size() {
             return (this.file.size * 0.00000095367432).toFixed(2)
+        },
+        showSize() {
+            const mimetype = this.file.mimetype;
+
+            if (isNaN(this.file.size)) {
+                return false;
+            }
+            return mimetype.indexOf('image') < 0 && mimetype.indexOf('viixet/form') < 0 && mimetype.indexOf('link') < 0;
+        },
+        fileName() {
+            const mimetype = this.file.mimetype;
+            
+            if (mimetype.indexOf('link') > -1) {
+                const ending = this.file.name.split('/').pop();
+                // finding out if the url is for a file
+                if (ending.indexOf('.') > -1) {
+                    return ending;
+                }
+            }
+
+            return this.file.name;
         }
     },
     mounted() {
