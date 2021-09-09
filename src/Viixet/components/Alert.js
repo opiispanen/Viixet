@@ -34,6 +34,7 @@ function viixetAlert({ message, subMessage, buttons }) {
     const modal = createElement(generateTemplate(fullMessage, buttonElems.join('')));
 
     document.body.appendChild(modal)
+    modal.querySelectorAll('.modal__footer .button')[0].focus();
 
     return new Promise((resolve, reject) => {
         modal.querySelectorAll('.modal__footer .button')

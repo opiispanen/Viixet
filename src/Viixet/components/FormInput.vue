@@ -4,9 +4,9 @@
         'switch': switcher,
         'selected': selected
     }">
-        <span class="form-item--label" v-if="enableLabel">{{ label }}</span>
+        <span class="form-item--label" v-if="enableLabel && !labelAfter">{{ label }}</span>
         <slot></slot>
-        <span v-if="switcher">{{ label }}</span>
+        <span v-if="switcher || labelAfter">{{ label }}</span>
     </label>
 </div>
 </template>
@@ -22,7 +22,12 @@ export default {
         switcher: {
             required: false,
             type: Boolean
-        }
+        },
+        labelAfter: {
+            required: false,
+            type: Boolean,
+            default: false,
+        },
     },
     data: () => ({
         selected: false
