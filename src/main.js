@@ -5,6 +5,8 @@ import App from './App.vue'
 
 import ViixetUser from './Viixet/User'
 
+import '../scss/frame.scss'
+
 Vue.use(ViixetUser, { store })
 
 new Vue({

@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({
 app.use(
     '/', 
     express.static(
-        __dirname + '/../', 
+        __dirname + '/../dist/', 
         { index: 'index.html' }
     )
 )

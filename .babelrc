@@ -1,9 +1,0 @@
-{
-  "plugins": [
-    "@babel/plugin-syntax-dynamic-import",
-    "@babel/transform-arrow-functions"
-  ],
-  "presets": [
-    ["@babel/env", { "modules": false }]
-  ]
-}
