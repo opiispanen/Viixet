@@ -1,4 +1,4 @@
-$normalInputs: 'input:not([type="radio"]):not([type="checkbox"])';
+$normalInputs: 'input:not([type="radio"]):not([type="checkbox"]):not([type="color"])';
 
 input, textarea, button, .button, select {
     border-radius: setting(input_borderRadius);
@@ -321,9 +321,12 @@ button:disabled,
 }
 
 .switch {
+    background: #fff;
     position: relative;
-    padding-left: spacing(8);
     user-select: none;
+    padding: 1em spacing(8) 1em 1em;
+    border: 1px solid $grey;
+    border-radius: setting(input_borderRadius);
 
     input[type="checkbox"] {
         display: none;
@@ -339,8 +342,8 @@ button:disabled,
 
 .switch:after {
     transition: transform 0.15s ease-out;
-    left: 0px;
-    top: -.25em;
+    right: .5em;
+    top: .75em;
     width: 1.5em;
     height: 1.5em;
     background: #f0f0f0;
@@ -350,13 +353,13 @@ button:disabled,
 
 .switch.selected:after {
     /*left: 15px;*/
-    transform: translateX(25px);
+    transform: translateX(-2em);
 }
 
 .switch:before {
     transition: background 0.15s ease-out;
-    left: 4px;
-    top: 0px;
+    right: 1em;
+    top: 1em;
     width: 2.5em;
     height: 1em;
     background: #a0a0a0;
